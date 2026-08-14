@@ -171,7 +171,7 @@ Translation (strictly no markdown blocks, do not hallucinate extra lines):`;
   try {
     const completion = await groq.chat.completions.create({
       messages: [{ role: 'system', content: prompt }],
-      model: 'llama-3.1-8b-instant',
+      model: 'gpt-oss-20b',
       temperature: 0.2,
       max_tokens: 500,
     });
