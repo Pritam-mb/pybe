@@ -342,35 +342,39 @@ function FlowButton({ children, onClick }: { children: React.ReactNode; onClick:
   );
 }
 
+// Story One — humanized, simple language, written to make the "Error"
+// concept obvious: two conditions had to hold before anything happened.
 const STORY_ONE_LINES: StoryLine[] = [
   {
     name: "Vyasa",
     align: "left",
-    text: "I'll dictate the whole of the Mahabharata to you — but only if you never stop writing, not even once.",
+    text: "I'll tell you the whole story — but only if you write down every word, and never stop until I'm done.",
   },
   {
     name: "Ganesha",
     align: "right",
-    text: "Then agree to this: I'll write only if I understand every verse before I write it down.",
+    text: "Deal. But I'll only write what I actually understand. If I don't get it, I'm not writing it.",
   },
 ];
 const STORY_ONE_CONCLUSION =
-  "Both conditions were set before a single word was spoken. If either one hadn't held, the dictation would never have started — not partly, not to be fixed later.";
+  "Both rules had to be true before a single word was said. If even one of them wasn't — nothing would get written. Not a little bit. Not a rough draft. Nothing.";
 
+// Story Two — humanized, simple language, written to make the "Exception"
+// concept obvious: something goes wrong mid-way, but there's still time to fix it.
 const STORY_TWO_LINES: StoryLine[] = [
   {
     name: "Arjuna",
     align: "left",
-    text: "The sun is setting. Jayadratha is still alive — I've failed my vow.",
+    text: "The sun's going down. Jayadratha's still alive. I've failed my vow.",
   },
   {
     name: "Krishna",
     align: "right",
-    text: "Look again. That's not the true sun — I covered it. The real daylight is still here.",
+    text: "Wait — look again. That's not the real sun. I covered it. We still have time.",
   },
 ];
 const STORY_TWO_CONCLUSION =
-  "The vow wasn't broken — just interrupted mid-way. Once the real sun was revealed, Arjuna still had time to finish it.";
+  "The vow wasn't actually broken — it just looked that way for a moment. Once the real sun came back, Arjuna still had time to finish what he promised.";
 
 const ERROR_SEGMENTS: RichSegment[] = [
   { text: "Something was wrong before the work could even begin. Python checks this first — like a " },

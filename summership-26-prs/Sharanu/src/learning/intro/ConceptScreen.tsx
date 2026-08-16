@@ -238,24 +238,25 @@ function TypedClosing({
   );
 }
 
-const INTRO_TEXT =
-  "The war at Kurukshetra had already begun — right in the middle of it, Arjuna stops.";
+// Simplified, humanized language — same event (Arjuna's crisis and
+// resolution at the start of the Gita), plainer words throughout.
+const INTRO_TEXT = "The war had already started. Right in the middle of it, Arjuna just... stops.";
 
 const LINES: { name: string; align: Align; text: string }[] = [
   {
     name: "Arjuna",
     align: "left",
-    text: "I can't continue this war. My own guru stands against me on that field.",
+    text: "I can't fight this war. My own teacher is standing on the other side.",
   },
   {
     name: "Krishna",
     align: "right",
-    text: "You're grieving a person. Look at the duty in front of you instead.",
+    text: "You're grieving a person, not doing your duty. Those aren't the same thing.",
   },
   {
     name: "Arjuna",
     align: "left",
-    text: "My delusion is destroyed. I will act by your word. He takes up Gandiva again.",
+    text: "My doubt is gone. I'll do what you say.",
   },
 ];
 
