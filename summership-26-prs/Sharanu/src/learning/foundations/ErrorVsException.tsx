@@ -162,7 +162,7 @@ function TypedDialogueLine({
       <div
         className={`backdrop-blur-xl border border-blue-500/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] rounded-2xl px-6 py-4 max-w-sm ${
           isLeft ? "rounded-tl-sm border-l-cyan-500/50" : "rounded-tr-sm border-r-indigo-500/50"
-        } ${name === 'Vyasa' ? 'bg-sky-950/70' : 'bg-slate-900/60'}`}
+        } ${isLeft ? 'bg-sky-950/70' : 'bg-slate-900/60'}`}
       >
         <p
           className={`font-mono text-[11px] tracking-[0.2em] font-semibold uppercase mb-1.5 ${
@@ -342,22 +342,24 @@ function FlowButton({ children, onClick }: { children: React.ReactNode; onClick:
   );
 }
 
-// Story One — humanized, simple language, written to make the "Error"
-// concept obvious: two conditions had to hold before anything happened.
+// Story One — humanized, simple language. A real Mahabharata episode:
+// Bhishma's lifelong vow was fixed long before Amba ever asked him anything —
+// a condition set before the "request" even existed, that makes the outcome
+// impossible no matter how reasonable the request is.
 const STORY_ONE_LINES: StoryLine[] = [
   {
-    name: "Vyasa",
+    name: "Amba",
     align: "left",
-    text: "I'll tell you the whole story — but only if you write down every word, and never stop until I'm done.",
+    text: "Bhishma, marry me. You're the one who brought me here.",
   },
   {
-    name: "Ganesha",
+    name: "Bhishma",
     align: "right",
-    text: "Deal. But I'll only write what I actually understand. If I don't get it, I'm not writing it.",
+    text: "I can't. I took a vow, long before you ever arrived — no wife, not for anyone, not ever.",
   },
 ];
 const STORY_ONE_CONCLUSION =
-  "Both rules had to be true before a single word was said. If even one of them wasn't — nothing would get written. Not a little bit. Not a rough draft. Nothing.";
+  "The vow existed before Amba ever asked. It didn't matter how reasonable her request was — the answer was already fixed, long before the question was even asked.";
 
 // Story Two — humanized, simple language, written to make the "Exception"
 // concept obvious: something goes wrong mid-way, but there's still time to fix it.
