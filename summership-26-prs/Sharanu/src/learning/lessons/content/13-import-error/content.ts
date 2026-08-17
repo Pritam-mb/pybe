@@ -9,7 +9,7 @@ const importError: Lesson = {
   storyTitle: "The Allies Who Were Never Coming",
   storyBody: `Before the war, both Duryodhana and Arjuna come to Krishna asking for his support.
 
-Krishna offers a choice: his entire army, fully armed — or himself alone, unarmed, only as an advisor.
+Krishna offers a choice: his entire army, fully armed, or himself alone, unarmed, only as an advisor.
 
 Duryodhana takes the army without hesitation. Arjuna chooses Krishna himself.`,
   storyDialogue: [
@@ -20,8 +20,8 @@ Duryodhana takes the army without hesitation. Arjuna chooses Krishna himself.`,
     { speaker: "Duryodhana", line: "Arjuna gets nothing but a man with no weapon?" },
     { speaker: "Krishna", line: "He asked for me. That was his choice to make, not yours to judge." },
   ],
-  storyIntroLine: `"Let me tell you about a choice two men made very differently."`,
-  storyOutroQuestion: `"Duryodhana's choice wasn't unreasonable. So why do you think it wasn't enough?"`,
+  storyIntroLine: `Let me tell you about a choice two men made very differently.`,
+  storyOutroQuestion: `Duryodhana's choice wasn't unreasonable. So why do you think it wasn't enough?`,
 
   pauseQuestion: "In Python, when your code says import some_module at the top of a file, what happens if that module doesn't actually exist in the environment it's running in?",
   pauseChoices: [
@@ -36,15 +36,15 @@ Duryodhana takes the army without hesitation. Arjuna chooses Krishna himself.`,
 
   import numpy_typo
 
-If a package named numpy_typo was never installed — or was misspelled — Python doesn't guess what you meant. It stops immediately, before your code even really starts running, because it can't fulfill a dependency your code assumed would be there.`,
+If a package named numpy_typo was never installed, or was misspelled, Python doesn't guess what you meant. It stops immediately, before your code even really starts running, because it can't fulfill a dependency your code assumed would be there.`,
 
-  mappingExplainer: `Duryodhana's choice wasn't irrational — an army is a real, tangible resource. But a plan built on the assumption that a resource will simply be there, without confirming it fits what's actually needed, is fragile in a specific way.
+  mappingExplainer: `Duryodhana's choice wasn't irrational, an army is a real, tangible resource. But a plan built on the assumption that a resource will simply be there, without confirming it fits what's actually needed, is fragile in a specific way.
 
 That's the shape of an ImportError. It's a dependency stated right at the top of your file, and if that assumption turns out false, everything built on top of it is unreachable immediately.`,
 
   codeExamples: [
     {
-      label: "Unhandled — the program crashes before it starts",
+      label: "Unhandled, the program crashes before it starts",
       language: "python",
       code: `import kaurava_reinforcements
 
@@ -55,7 +55,7 @@ def prepare_for_war():
 # ModuleNotFoundError: No module named 'kaurava_reinforcements'`,
     },
     {
-      label: "Handled — the program has a fallback plan",
+      label: "Handled, the program has a fallback plan",
       language: "python",
       code: `try:
     import kaurava_reinforcements
@@ -67,7 +67,7 @@ def prepare_for_war():
     if reinforcements_available:
         kaurava_reinforcements.deploy()
     else:
-        print("Proceeding without the expected reinforcements")
+        print('Proceeding without the expected reinforcements')
 
 prepare_for_war()
 # Proceeding without the expected reinforcements`,
@@ -77,7 +77,7 @@ prepare_for_war()
   practiceLadder: [
     {
       stage: "predict",
-      prompt: "A teammate's code uses an optional module for extra graphics if it's installed, falling back to plain text if not. Where does the ImportError actually get raised — inside the function, or before it's even defined?",
+      prompt: "A teammate's code uses an optional module for extra graphics if it's installed, falling back to plain text if not. Where does the ImportError actually get raised, inside the function, or before it's even defined?",
       starterCode: `try:
     import fancy_graphics
 except ImportError:
@@ -87,7 +87,7 @@ def render(scene):
     if fancy_graphics:
         fancy_graphics.draw(scene)
     else:
-        print(f"[scene: {scene}]")`,
+        print(f'[scene: {scene}]')`,
     },
     {
       stage: "debug",
@@ -107,7 +107,7 @@ except ImportError:
 def show_report():
     if HAS_STATS:
         return battle_stats.generate()
-    return "Detailed stats unavailable — module not installed"
+    return 'Detailed stats unavailable, module not installed'
 
 print(show_report())`,
     },
@@ -120,7 +120,7 @@ print(show_report())`,
   reflectionPrompt:
     "Duryodhana's plan assumed a resource would simply be enough, without confirming it was the right fit. Where else does a plan quietly depend on something being available, right up until the exact moment it's needed?",
 
-  badgeUnlocked: "Sambhavya — What Was Assumed, Not Confirmed",
+  badgeUnlocked: "Sambhavya, What Was Assumed, Not Confirmed",
 };
 
 export default importError;

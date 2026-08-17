@@ -7,21 +7,21 @@ const keyError: Lesson = {
   title: "KeyError",
 
   storyTitle: "The Garden That Wasn't on the List",
-  storyBody: `Hanuman searches Lanka for Sita. He checks the palace, the treasury, the queens' chambers.
+  storyBody: `Hanuman searches Lanka for Sita, checking one name at a time — the palace, the treasury, the queens' chambers.
 
-Each place is real. None of them hold what he's looking for.
+Each name is real. None of them hold what he's looking for.
 
-He finally finds her in the Ashoka Vatika — a place he hadn't checked yet.`,
+He finally finds her in the Ashoka Vatika — a name that was never on the list he started with.`,
   storyDialogue: [
-    { speaker: "Hanuman", line: "I have searched the palace. She isn't there." },
-    { speaker: "Hanuman", line: "I have searched the treasury, the queens' chambers. Still nothing." },
-    { speaker: "Hanuman", line: "Every place I was told to expect her — empty." },
-    { speaker: "Hanuman", line: "There is one place left I haven't tried — the garden at the edge of the grounds." },
-    { speaker: "Hanuman", line: "Not the palace. Not the treasury. The Ashoka Vatika." },
+    { speaker: "Hanuman", line: "I checked under the name palace. She isn't there." },
+    { speaker: "Hanuman", line: "I checked treasury, queens' chambers. Still nothing." },
+    { speaker: "Hanuman", line: "Every name I was given — empty." },
+    { speaker: "Hanuman", line: "There's one name I never tried. The Ashoka Vatika." },
+    { speaker: "Hanuman", line: "It wasn't on the list I started with. Let me check it anyway." },
     { speaker: "Hanuman", line: "There — under the trees. It's her." },
   ],
-  storyIntroLine: `"Let me tell you about a search that kept coming up empty — until it didn't."`,
-  storyOutroQuestion: `"Every place Hanuman checked was a reasonable guess. So why do you think the search kept failing?"`,
+  storyIntroLine: `Let me tell you about a search that kept coming up empty — until it tried a name that was never on the original list.`,
+  storyOutroQuestion: `Every name Hanuman checked was a reasonable guess. So why do you think the search kept failing?`,
 
   pauseQuestion: "In Python, what happens when you look something up in a dictionary using a key that isn't actually in it?",
   pauseChoices: [

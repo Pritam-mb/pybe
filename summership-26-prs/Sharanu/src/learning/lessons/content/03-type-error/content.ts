@@ -7,13 +7,21 @@ const typeError: Lesson = {
   title: "TypeError",
 
   storyTitle: "The Bow That Would Not Bend",
-  storyBody: `King Drupada sets one task for Draupadi's swayamvara: string an enormous bow, then hit a target using only its reflection.
+  storyBody: `King Drupada sets one task for Draupadi's swayamvara: string a huge bow, then hit a target using only its reflection.
 
-Powerful kings step up one by one. Most can't even lift the bow. Strength alone isn't what this bow needs.
+Kings step up one after another. Most can't even lift the bow. Strength was never what this bow needed.
 
-Arjuna, disguised as a wandering Brahmin, steps forward — and succeeds, because he brings exactly what the trial required.`,
-  storyIntroLine: `"Let me tell you about a bow that refused to bend for the wrong kind of hero."`,
-  storyOutroQuestion: `"Every king who failed had something real to offer. Why do you think it still wasn't enough?"`,
+Arjuna steps forward, disguised as a wandering Brahmin — and succeeds, because he brings the one thing the bow actually needed.`,
+  storyDialogue: [
+    { speaker: "Dhrishtadyumna", line: "Whoever strings this bow and strikes the target may marry my sister." },
+    { speaker: "Dhrishtadyumna", line: "Many have tried already. None of them could even lift it." },
+    { speaker: "Arjuna", line: "Let me try." },
+    { speaker: "Dhrishtadyumna", line: "You think you'll succeed where strong kings have failed?" },
+    { speaker: "Arjuna", line: "This bow was never asking for strength. It's asking for something else." },
+    { speaker: "Arjuna", line: "The bow is strung. The target is struck." },
+  ],
+  storyIntroLine: `Let me tell you about a bow that refused to bend for the wrong kind of hero.`,
+  storyOutroQuestion: `Every king who failed had something real to offer. Why do you think it still wasn't enough?`,
 
   pauseQuestion: "In Python, what happens when you hand a function an object it fundamentally can't work with — not a wrong number, but the wrong kind of thing entirely?",
   pauseChoices: [

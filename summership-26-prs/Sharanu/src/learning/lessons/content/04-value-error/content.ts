@@ -20,8 +20,8 @@ Game after game, Yudhishthira loses everything, because the dice were never trul
     { speaker: "Shakuni", line: "Luck has nothing to do with it." },
     { speaker: "Yudhishthira", line: "Then what does?" },
   ],
-  storyIntroLine: `"Let me tell you about dice that looked perfectly normal — and weren't."`,
-  storyOutroQuestion: `"The dice passed every obvious check. So what was actually wrong with them?"`,
+  storyIntroLine: `Let me tell you about dice that looked perfectly normal — and weren't.`,
+  storyOutroQuestion: `The dice passed every obvious check. So what was actually wrong with them?`,
 
   pauseQuestion: "In Python, what's different about a function receiving the right type of object, but with a value that's invalid for what it needs to do?",
   pauseChoices: [

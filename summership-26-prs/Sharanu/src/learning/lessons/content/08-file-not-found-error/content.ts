@@ -4,27 +4,25 @@ const fileNotFoundError: Lesson = {
   id: "FileNotFoundError",
   slug: "08-file-not-found-error",
   order: 8,
-  title: "FileNotFoundException",
+  title: "FileNotFoundError",
 
   storyTitle: "The Hermitage That Was Empty",
-  storyBody: `King Dasharatha dies of grief soon after Rama's exile. Bharata is called back to rule, but he refuses the throne — it was never meant to be his. He wants to give it back to Rama himself.
+  storyBody: `King Dasharatha dies of grief soon after Rama's exile. Bharata is called back to rule, but refuses the throne — it was never meant to be his. He wants to give it back to Rama himself.
 
-So Bharata sets out from Ayodhya with an army and a crowd of citizens, following the path Rama took into exile.
+So Bharata sets out from Ayodhya, following the exact path Rama took into exile, guided by a boatman named Guha at the river crossing.
 
-He travels to a river crossing where Rama is said to have stayed, guided by a boatman named Guha. Bharata arrives at that exact spot, ready to plead with his brother to come home.
+He arrives at that exact crossing. Rama isn't there anymore — he's already moved on, deeper into the forest, toward a hill called Chitrakoot.
 
-Rama isn't there. He has already moved on, deeper into the forest, toward a hill called Chitrakoot.
-
-The place wasn't wrong — it was a real stop on Rama's journey, exactly as Bharata had been told. It just no longer held what he was looking for. So he presses on, until he finally finds Rama at Chitrakoot with Sita and Lakshmana.`,
-  storyIntroLine: `"Let me tell you about a place that was exactly right — and still turned out to be empty."`,
+The path wasn't wrong. It was the real, correct route Rama had actually taken. It just no longer held what Bharata needed. So he presses on, until he finally finds Rama at Chitrakoot.`,
   storyDialogue: [
-    { speaker: "Bharata", line: "I've come looking for my brother Rama. Guha, is he here?" },
-    { speaker: "Guha", line: "He was here. He stayed a while, then crossed the river and moved on." },
-    { speaker: "Bharata", line: "Then where is he now?" },
+    { speaker: "Bharata", line: "I've come looking for my brother Rama. Guha, is this the right path?" },
+    { speaker: "Guha", line: "It is. He stayed at this very crossing — then moved on." },
+    { speaker: "Bharata", line: "Then the path was correct. He's just not here anymore." },
     { speaker: "Guha", line: "He spoke of a hill called Chitrakoot. That's all I know." },
-    { speaker: "Bharata", line: "Then that's where I'll go too." },
+    { speaker: "Bharata", line: "Then that's where I'll go next." },
   ],
-  storyOutroQuestion: `"Bharata went to the exact right place, and it was still empty. What do you think that means, when the place you're looking for used to have what you needed?"`,
+  storyIntroLine: `Let me tell you about a path that was exactly right — and still turned out to be empty.`,
+  storyOutroQuestion: `Bharata went to the exact right path, and it was still empty. What do you think that means, when the place you're looking for used to have what you needed?`,
 
   pauseQuestion: "In Python, what happens when your code tries to open a file at a path that turns out not to exist on the computer at all?",
   pauseChoices: [
@@ -44,7 +42,7 @@ If no file with that exact name exists in that exact location, Python doesn't in
 
   mappingExplainer: `This is a slightly different flavor of "not found" than a KeyError. A KeyError happens inside your own program — you're asking your own dictionary for something you genuinely never put into it. A FileNotFoundError reaches outside your program, into the actual filesystem, which your code doesn't fully control and can't always predict in advance.
 
-Bharata's search has that same outward-facing uncertainty. Guha's crossing was a real, correctly-identified location — not a wrong guess — and it still didn't have what he needed, because the world outside his plan had moved on since he last had information about it. That's the honest situation FileNotFoundError describes: the path was reasonable, the resource simply isn't there right now, and your code needs a plan for that possibility before it ever runs.`,
+Bharata's search has that same outward-facing uncertainty. Guha's crossing was a real, correctly-identified path — not a wrong guess — and it still didn't have what he needed, because the world outside his plan had moved on since he last had information about it.`,
 
   codeExamples: [
     {

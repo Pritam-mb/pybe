@@ -1,4 +1,5 @@
 import type { Lesson } from "./types";
+import tryExceptBasics from "./content/01-try-except-basics/content";
 import zeroDivisionError from "./content/02-zero-division-error/content";
 import typeError from "./content/03-type-error/content";
 import valueError from "./content/04-value-error/content";
@@ -15,8 +16,10 @@ import exceptionHierarchy from "./content/14-exception-hierarchy/content";
 import customExceptions from "./content/15-custom-exceptions/content";
 import capstone from "./content/16-capstone/content";
 
-// The full 16-lesson sequence — every content.ts from the framework, now wired in.
+// The full lesson sequence, in order. PathMap, LessonNav, and
+// ProgressContext all read from this single list.
 export const LESSONS: Lesson[] = [
+  tryExceptBasics,
   zeroDivisionError,
   typeError,
   valueError,

@@ -4,29 +4,23 @@ const attributeError: Lesson = {
   id: "AttributeError",
   slug: "07-attribute-error",
   order: 7,
-  title: "AttributeException",
+  title: "AttributeError",
 
   storyTitle: "The Mantra That Wasn't There",
-  storyBody: `Karna wants to learn from Parashurama, the greatest teacher of weapons. But Parashurama only teaches Brahmins. So Karna hides who he really is and says he is one.
+  storyBody: `Karna wants to learn from Parashurama, the greatest teacher of weapons. Parashurama only teaches Brahmins, so Karna hides who he really is.
 
-He trains hard and learns well. Parashurama teaches him the Brahmastra — a powerful weapon — along with the exact words needed to use it.
+He trains hard and learns well, including the exact words needed to use the Brahmastra. One day, a creature bites into his leg while he sleeps near his guru — Karna stays silent through the pain, and that silence gives him away. No Brahmin could bear that without flinching.
 
-One day Karna falls asleep with his head on his guru's lap. A creature bites into his leg. It hurts, but Karna was trained to stay silent through pain, so he doesn't move or cry out.
-
-When Parashurama wakes up and sees the wound, he understands something: only a warrior would stay silent through that much pain, not a Brahmin. He realizes Karna lied to him.
-
-Parashurama curses him: "In your final battle, when you need this weapon's words the most, you will not remember them."
-
-Years later, in his last battle, Karna reaches for those words. They are not there.`,
-  storyIntroLine: `"Let me tell you about a warrior who lost the one thing he needed, at the one moment he needed it most."`,
+Parashurama curses him: everything else Karna has learned stays with him, but this one mantra will not come to him when he needs it most. Years later, in his final battle, Karna reaches for it. It isn't there.`,
   storyDialogue: [
     { speaker: "Parashurama", line: "Only a warrior could stay silent through pain like that. You are not a Brahmin — you lied to me." },
     { speaker: "Karna", line: "I only wanted to learn from the greatest teacher there is." },
-    { speaker: "Parashurama", line: "Then hear this: when you need this weapon's mantra the most, in your final battle, it will not come to you." },
+    { speaker: "Parashurama", line: "Then hear this. Everything else you've learned stays with you. But this one mantra — when you need it most, it will not come." },
     { speaker: "Karna", line: "Years later, on the battlefield, I reach for it." },
     { speaker: "Karna", line: "It isn't there." },
   ],
-  storyOutroQuestion: `"The knowledge never left the world — it just wasn't there for him, right when he reached for it. What do you think that kind of failure actually looks like?"`,
+  storyIntroLine: `Let me tell you about a warrior who lost one specific thing, at the one moment he needed it most.`,
+  storyOutroQuestion: `The knowledge never left the world — it just wasn't there for him, right when he reached for it. What do you think that kind of failure actually looks like?`,
 
   pauseQuestion: "In Python, what happens when your code assumes an object has a certain capability — a method, a piece of data — and it turns out it doesn't?",
   pauseChoices: [
@@ -46,7 +40,7 @@ A dictionary simply has no method called invoke_brahmastra — nothing was ever 
 
   mappingExplainer: `The curse never took the Brahmastra out of the world, and it never made Karna forget how to fight. It removed one specific, narrow thing — the recall of a particular mantra — precisely at the moment reaching for it mattered most. Everything else about Karna as a warrior remained exactly as capable as before.
 
-An AttributeError has that same narrow shape. The object isn't broken, the program hasn't crashed for some sweeping reason — one specific expected capability simply isn't attached to this particular object, and the code reached for it anyway, assuming it would be there because it usually is, or because it exists on a similar object elsewhere in the code.`,
+An AttributeError has that same narrow shape. The object isn't broken, the program hasn't crashed for some sweeping reason — one specific expected capability simply isn't attached to this particular object, and the code reached for it anyway, assuming it would be there.`,
 
   codeExamples: [
     {

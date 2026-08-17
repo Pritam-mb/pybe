@@ -7,21 +7,21 @@ const indexError: Lesson = {
   title: "IndexError",
 
   storyTitle: "The Eye of the Bird",
-  storyBody: `Drona sets a wooden bird on a branch and asks each student the same question: "What do you see?"
+  storyBody: `Drona sets a wooden bird on a branch and asks each student the same question: what do you see?
 
-Student after student describes the tree, the sky, the whole scene. Drona sends them all back without letting them shoot.
+Student after student describes the whole scene — the tree, the branch, the sky. Drona sends them all back without letting them shoot.
 
-Arjuna answers: "I see only the bird's eye." Nothing else. Drona tells him to shoot.`,
+Arjuna answers with one exact position: the bird's eye. Nothing before it, nothing beyond it. Drona tells him to shoot.`,
   storyDialogue: [
     { speaker: "Drona", line: "Before you shoot, tell me — what do you see?" },
-    { speaker: "Yudhishthira", line: "I see the tree, the branch, the bird, and all of you standing near me." },
-    { speaker: "Drona", line: "Step back. You are not ready to shoot." },
+    { speaker: "Yudhishthira", line: "I see the tree, the branch, the bird, everyone standing near me." },
+    { speaker: "Drona", line: "That's not one position. That's the whole scene. Step back." },
     { speaker: "Drona", line: "Arjuna, what do you see?" },
-    { speaker: "Arjuna", line: "I see only the bird's eye. Nothing else." },
-    { speaker: "Drona", line: "Then shoot." },
+    { speaker: "Arjuna", line: "One exact point. The bird's eye. Nothing beyond it." },
+    { speaker: "Drona", line: "Then shoot. That's the only position that actually matters." },
   ],
-  storyIntroLine: `"Let me tell you about a question only one student answered the way it needed to be answered."`,
-  storyOutroQuestion: `"Every other student's answer was true. Why do you think it still wasn't enough?"`,
+  storyIntroLine: `Let me tell you about a question only one student answered with an exact position instead of a general one.`,
+  storyOutroQuestion: `Every other student's answer described something real. Why do you think it still wasn't precise enough?`,
 
   pauseQuestion: "In Python, what happens when you ask a list for a position that doesn't exist in it — not vague, a specific position too far out?",
   pauseChoices: [
