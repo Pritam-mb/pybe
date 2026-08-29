@@ -160,6 +160,51 @@ function OwlCorrection({ misconception, question }) {
   );
 }
 
+// ── MCQ Panel ─────────────────────────────────────────────────────────
+function McqPanel({ mcq, onCorrect }) {
+  const [selectedIdx, setSelectedIdx] = useState(null);
+  const [status, setStatus] = useState(null);
+  const [showHint, setShowHint] = useState(false);
+
+  function handleSelect(idx) {
+    if (status === 'correct') return;
+    setSelectedIdx(idx);
+    if (idx === mcq.answerIndex) {
+      setStatus('correct');
+      setTimeout(onCorrect, 1500);
+    } else {
+      setStatus('wrong');
+      setShowHint(true);
+    }
+  }
+
+  return (
+    <div className="mcq-panel">
+      <div className="mcq-question">{mcq.question}</div>
+      <div className="mcq-options">
+        {mcq.options.map((opt, i) => {
+          let cls = "mcq-option";
+          if (selectedIdx === i) {
+            cls += status === 'correct' ? " correct" : (status === 'wrong' ? " wrong" : "");
+          } else if (status === 'correct' && i === mcq.answerIndex) {
+            cls += " correct";
+          }
+          return (
+            <button key={i} className={cls} onClick={() => handleSelect(i)} disabled={status === 'correct'}>
+              {opt}
+            </button>
+          );
+        })}
+      </div>
+      {showHint && status === 'wrong' && (
+        <div style={{marginTop:'1rem'}}>
+          <OwlCorrection misconception="Not quite." question={mcq.hint} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Code Solve ───────────────────────────────────────────────────────
 function CodeSolve({ codeReveal, onSolve }) {
   const [blankValue, setBlankValue] = useState('');
@@ -245,14 +290,15 @@ function CodeSolve({ codeReveal, onSolve }) {
 }
 
 // ── Field Journal Sidebar ────────────────────────────────────────────
-function FieldJournal({ saga, currentActNumber, completedActs }) {
+function FieldJournal({ saga, currentActNumber, completedActs, xp }) {
   if (!saga) return <div className="field-journal"/>;
 
   return (
     <div className="field-journal">
       <div className="journal-header">
         <div className="journal-title">
-          <span>📖</span> Field Journal
+          <span>📖 Field Journal</span>
+          <span className="journal-xp">{xp} XP</span>
         </div>
       </div>
       <div className="journal-scroll">
@@ -295,16 +341,18 @@ function App() {
   const [allActs, setAllActs] = useState([]);
   
   // State Machine
-  // Modes: 'intro' -> 'narrating' -> 'observation' -> 'evaluating' -> 'code' -> 'success'
+  // Modes: 'intro' -> 'narrating' -> 'observation' -> 'evaluating' -> 'mcq' -> 'syntax' -> 'code' -> 'success'
   const [actIndex, setActIndex] = useState(0);
   const [mode, setMode] = useState('intro'); 
   
-  // Narrative State
+  // Narrative & Lesson State
   const [dialogueIndex, setDialogueIndex] = useState(0);
+  const [lessonIndex, setLessonIndex] = useState(0);
   const [correction, setCorrection] = useState(null);
   
-  // Journal State
+  // Journal & XP State
   const [completedActs, setCompletedActs] = useState([]);
+  const [xp, setXp] = useState(0);
 
   useEffect(() => {
     Promise.all([
@@ -337,13 +385,13 @@ function App() {
                <div className="saga-subtitle">You have discovered the core patterns of Object-Oriented Inheritance.</div>
                <div className="saga-stats">
                  <div className="stat-box"><strong>{completedActs.length}</strong><span>Acts Completed</span></div>
-                 <div className="stat-box"><strong>Arc 2</strong><span>Reached</span></div>
+                 <div className="stat-box"><strong>{xp}</strong><span>Total XP</span></div>
                </div>
                <button className="chapter-btn" onClick={() => window.location.reload()}>Play Again</button>
              </div>
           </div>
         </div>
-        <FieldJournal saga={saga} currentActNumber={999} completedActs={completedActs} />
+        <FieldJournal saga={saga} currentActNumber={999} completedActs={completedActs} xp={xp} />
       </div>
     );
   }
@@ -356,7 +404,15 @@ function App() {
     if (dialogueIndex < currentAct.narrative.length - 1) {
       setDialogueIndex(i => i + 1);
     } else {
-      setMode(currentAct.observationPrompt ? 'observation' : 'code');
+      setMode(currentAct.observationPrompt ? 'observation' : 'mcq');
+    }
+  };
+
+  const handleLessonComplete = () => {
+    if (lessonIndex < currentAct.syntaxLesson.length - 1) {
+      setLessonIndex(i => i + 1);
+    } else {
+      setMode('code');
     }
   };
 
@@ -370,7 +426,7 @@ function App() {
       });
       if (result.understood) {
         setCorrection(null);
-        setMode(currentAct.codeReveal ? 'code' : 'success');
+        setMode(currentAct.mcq ? 'mcq' : (currentAct.codeReveal ? 'code' : 'success'));
       } else {
         setCorrection(result);
         setMode('observation');
@@ -381,7 +437,22 @@ function App() {
     }
   };
 
+  const handleMcqCorrect = () => {
+    if (currentAct.codeReveal && currentAct.syntaxLesson) {
+      setMode('syntax');
+    } else if (currentAct.codeReveal) {
+      setMode('code');
+    } else {
+      handleSuccessState();
+    }
+  };
+
   const handleCodeSolve = () => {
+    handleSuccessState();
+  };
+
+  const handleSuccessState = () => {
+    setXp(prev => prev + 100);
     setMode('success');
   };
 
@@ -389,12 +460,15 @@ function App() {
     setCompletedActs(prev => [...prev, currentAct.act]);
     setActIndex(i => i + 1);
     setDialogueIndex(0);
+    setLessonIndex(0);
     setCorrection(null);
     setMode('intro');
   };
 
   const currentDialogue = currentAct.narrative[dialogueIndex];
-  const speaker = saga.characters[currentDialogue.speaker];
+  const currentLesson = currentAct.syntaxLesson ? currentAct.syntaxLesson[lessonIndex] : null;
+  const speaker = currentDialogue ? saga.characters[currentDialogue.speaker] : null;
+  const lessonSpeaker = currentLesson ? saga.characters[currentLesson.speaker] : null;
 
   return (
     <div className="app">
@@ -442,6 +516,14 @@ function App() {
             />
           ) : null}
 
+          {/* MCQ Panel */}
+          {mode === 'mcq' && currentAct.mcq && (
+            <McqPanel 
+              mcq={currentAct.mcq}
+              onCorrect={handleMcqCorrect}
+            />
+          )}
+
           {/* Code Panel */}
           {mode === 'code' && currentAct.codeReveal && (
             <CodeSolve 
@@ -456,14 +538,17 @@ function App() {
                <span className="success-icon">✅</span>
                <div className="success-title">Discovery Logged</div>
                <div className="success-subtitle">You successfully identified the {currentAct.concept} pattern.</div>
+               <div className="xp-badge">
+                 <span className="xp-icon">⭐</span> +100 XP
+               </div>
                <button className="chapter-btn" onClick={handleNextAct}>Continue Saga ▶</button>
             </div>
           )}
 
         </div>
         
-        {/* Dialogue Box (only during narrating mode) */}
-        {mode === 'narrating' && (
+        {/* Dialogue Box for Narrative */}
+        {mode === 'narrating' && currentDialogue && (
           <DialogueBox 
             speaker={speaker}
             text={currentDialogue.text}
@@ -472,12 +557,24 @@ function App() {
             onComplete={handleDialogueComplete}
           />
         )}
+
+        {/* Dialogue Box for Syntax Lesson */}
+        {mode === 'syntax' && currentLesson && (
+          <DialogueBox 
+            speaker={lessonSpeaker}
+            text={currentLesson.text}
+            avatarStr={lessonSpeaker.avatar}
+            isLast={lessonIndex === currentAct.syntaxLesson.length - 1}
+            onComplete={handleLessonComplete}
+          />
+        )}
       </div>
 
       <FieldJournal 
         saga={saga} 
         currentActNumber={currentAct.act} 
         completedActs={completedActs} 
+        xp={xp}
       />
     </div>
   );

@@ -470,6 +470,54 @@ body {
 }
 .code-explanation strong { color:var(--green); }
 
+/* ── MCQ PANEL ────────────────────────────────────────────── */
+.mcq-panel {
+  padding:1.25rem 1.5rem;
+  animation:slideUp 0.35s ease-out;
+}
+.mcq-question {
+  font-size:1.05rem; color:var(--text); font-weight:500;
+  margin-bottom:1.25rem; line-height:1.5;
+}
+.mcq-options {
+  display:flex; flex-direction:column; gap:0.65rem;
+}
+.mcq-option {
+  display:flex; align-items:center; gap:0.75rem;
+  padding:0.85rem 1rem;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border-hi);
+  border-radius:var(--radius-sm);
+  color:var(--text-dim);
+  font-family:'Inter',sans-serif;
+  font-size:0.93rem; cursor:pointer;
+  transition:all 0.2s; text-align:left;
+}
+.mcq-option:hover:not(:disabled) {
+  background:rgba(255,255,255,0.06);
+  border-color:var(--accent);
+  color:var(--text);
+}
+.mcq-option.correct {
+  background:rgba(52,211,153,0.1); border-color:var(--green); color:var(--green);
+}
+.mcq-option.wrong {
+  background:rgba(248,113,113,0.1); border-color:var(--red); color:var(--red);
+}
+
+/* ── XP BADGE ─────────────────────────────────────────────── */
+.xp-badge {
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:0.4rem; padding:0.4rem 0.8rem;
+  background:linear-gradient(135deg, #fbbf24, #f59e0b);
+  color:#fff; font-weight:700; font-size:0.9rem;
+  border-radius:99px;
+  box-shadow:0 4px 15px rgba(251,191,36,0.4);
+  animation:popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+  margin-top:0.75rem; margin-bottom:1rem;
+}
+.xp-icon { font-size:1.1rem; }
+
 /* ── FIELD JOURNAL ────────────────────────────────────────── */
 .field-journal {
   background:var(--bg-panel);
@@ -487,6 +535,13 @@ body {
   letter-spacing:0.1em; text-transform:uppercase;
   color:var(--text-muted);
   display:flex; align-items:center; gap:0.5rem;
+  justify-content:space-between;
+}
+.journal-xp {
+  color:var(--amber);
+  background:rgba(251,191,36,0.15);
+  padding:0.2rem 0.5rem;
+  border-radius:4px;
 }
 .journal-scroll { flex:1; overflow-y:auto; padding:0.75rem 1rem; }
 

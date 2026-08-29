@@ -31,6 +31,12 @@
               "If you had to group these shared traits under one label — what would you call that group?"
             ],
             "expectedInsight": "Learner identifies shared/common traits across all animals — generalization thinking, recognizing a base pattern",
+            "mcq": {
+              "question": "If we group the Lion, Eagle, and Dolphin into one category based on their shared traits, what concept are we applying?",
+              "options": ["Specialization", "Generalization", "Randomization"],
+              "answerIndex": 1,
+              "hint": "Think about finding the 'general' pattern that applies to all of them."
+            },
             "codeReveal": null
           },
           {
@@ -52,6 +58,12 @@
               "In your own words — how would you describe the eagle's relationship to the general 'animal' group?"
             ],
             "expectedInsight": "Learner articulates the extension relationship: eagle = shared animal foundation + something uniquely its own (is-a pattern with specialization)",
+            "mcq": {
+              "question": "Because the Eagle shares all traits of an Animal but adds flying, we can say that the Eagle...",
+              "options": ["is NOT an Animal.", "is a specialization of an Animal.", "replaces the Animal entirely."],
+              "answerIndex": 1,
+              "hint": "The eagle builds on top of the Animal foundation. It's a specific type of Animal."
+            },
             "codeReveal": null
           },
           {
@@ -71,6 +83,12 @@
               "Now that you know the name — can you think of another real-world example where something inherits everything from a group and adds something extra of its own?"
             ],
             "expectedInsight": "Learner can transfer the pattern to a new domain — showing they understand the concept, not just memorized the story",
+            "mcq": {
+              "question": "Which of the following is the best real-world example of Inheritance?",
+              "options": ["A steering wheel being part of a Car.", "A Smartphone inheriting from a general Phone, but adding a touchscreen.", "A Dog chasing a Cat."],
+              "answerIndex": 1,
+              "hint": "Look for a relationship where one thing IS A type of another thing, just with more features."
+            },
             "codeReveal": null
           },
           {
@@ -80,12 +98,22 @@
             "image": "/images/act4.jpeg",
             "narrative": [
               { "speaker": "priya", "text": "Now let's see how Python says what you already understand. Look at this — Animal exists as a class. The eagle inherits from it." },
-              { "speaker": "pip", "text": "Hoo! One blank. You know what goes there. You described it yourself!" },
-              { "speaker": "narrator", "text": "The code appears. One fill-in-the-blank." }
+              { "speaker": "pip", "text": "Hoo! It's time to write the code!" }
             ],
             "observationPrompt": null,
             "questions": [],
             "expectedInsight": "Learner fills class Eagle(Animal): — mapping their story understanding to Python syntax",
+            "mcq": {
+              "question": "In the relationship between Animal and Eagle, which one is considered the 'Parent' class?",
+              "options": ["Eagle", "Animal", "Both are Parents"],
+              "answerIndex": 1,
+              "hint": "The Parent class is the general one that passes its traits down."
+            },
+            "syntaxLesson": [
+              { "speaker": "priya", "text": "In Python, we first define the parent class using the `class` keyword, like this: `class Animal:`" },
+              { "speaker": "priya", "text": "To create a child class that inherits from it, we put the parent's name in parentheses right after the child's name." },
+              { "speaker": "pip", "text": "Hoo! So `class Child(Parent):` is the secret formula!" }
+            ],
             "codeReveal": {
               "file": "inheritance_basics.py",
               "template": "class Animal:\n    def breathe(self):\n        print(\"breathing...\")\n    def move(self):\n        print(\"moving...\")\n    def eat(self):\n        print(\"eating...\")\n\nclass Eagle(____):    # Eagle is-a Animal\n    def fly(self):\n        print(\"soaring high!\")\n\neagle = Eagle()\neagle.breathe()   # inherited from Animal ✓\neagle.fly()       # Eagle's own ability ✓",
@@ -118,11 +146,22 @@
               "If the chameleon inherited 'how to eat' from the Animal group, but does it completely differently — what do you think happens to the original version? Does it disappear? Or does the chameleon simply do its own version instead?"
             ],
             "expectedInsight": "Learner understands that the chameleon replaces/specializes an inherited behaviour rather than adding something new — the concept of overriding without the word",
+            "mcq": {
+              "question": "When the Chameleon 'eats' differently than a normal Animal, what is it doing to the inherited behavior?",
+              "options": ["Deleting it from the parent.", "Overriding it with its own custom version.", "Ignoring it completely."],
+              "answerIndex": 1,
+              "hint": "The original still exists for other animals, but the Chameleon chooses to use its own version."
+            },
+            "syntaxLesson": [
+              { "speaker": "priya", "text": "To override a behavior in Python, the child class simply writes a method with the EXACT SAME NAME as the parent's method." },
+              { "speaker": "pip", "text": "Hoo! So if the parent has `def eat(self):`, the child just writes its own `def eat(self):`!" },
+              { "speaker": "priya", "text": "Correct. Python will always use the child's version if it exists." }
+            ],
             "codeReveal": {
               "file": "overriding.py",
               "template": "class Animal:\n    def eat(self):\n        print(\"opens mouth and swallows\")\n\nclass Chameleon(Animal):\n    def eat(self):    # This ____ the parent's eat()\n        print(\"tongue-flick! catches fly in 0.07 seconds\")\n\nc = Chameleon()\nc.eat()   # Which eat() runs?",
               "blanks": [{ "placeholder": "????", "answer": "overrides", "hint": "The chameleon's eat() replaces the Animal's eat(). In programming, this is called ____ing." }],
-              "explanation": "When a child class defines a method with the same name as a parent's method, it overrides it. The child's version runs instead. The original still exists in the parent — the child simply chooses its own version."
+              "explanation": "When a child class defines a method with the same name as a parent's method, it overrides it. The child's version runs instead."
             }
           },
           {
@@ -142,6 +181,17 @@
               "If you were writing instructions for the chameleon's eating behaviour — how would you describe the two-step process it follows?"
             ],
             "expectedInsight": "Learner describes the pattern: first do the inherited behaviour, then layer your own on top — the concept behind super() without the word",
+            "mcq": {
+              "question": "Why does the Chameleon use a 'call back' to the elder's behavior?",
+              "options": ["To erase the parent's eating method.", "To reuse the parent's normal eating method first, before adding its own twist.", "To become a super animal."],
+              "answerIndex": 1,
+              "hint": "It wants to keep the shared behavior, not throw it away."
+            },
+            "syntaxLesson": [
+              { "speaker": "priya", "text": "In Python, we use the `super()` function to 'whisper back to the elder'." },
+              { "speaker": "pip", "text": "Hoo! It literally means 'give me the super-class' (the parent)!" },
+              { "speaker": "priya", "text": "Right. So `super().eat()` tells Python to run the parent's `eat` method first, before continuing with the child's custom code." }
+            ],
             "codeReveal": {
               "file": "super_call.py",
               "template": "class Animal:\n    def eat(self):\n        print(\"opens mouth...\")\n\nclass Chameleon(Animal):\n    def eat(self):\n        ____().eat()    # Step 1: do what Animal does first\n        print(\"...THEN tongue-flick!\")  # Step 2: add own twist\n\nc = Chameleon()\nc.eat()\n# Output:\n# opens mouth...\n# ...THEN tongue-flick!",
@@ -166,6 +216,17 @@
               "When the eagle's entry is created, what should happen first — fill in the standard animal fields, or fill in the wingspan? Does the order matter?"
             ],
             "expectedInsight": "Learner sees that even initialization follows the inheritance pattern — the child's constructor should handle the parent's required fields first, then its own additions",
+            "mcq": {
+              "question": "When creating a new eagle, why must we call the parent's initialization process before setting the wingspan?",
+              "options": ["Because wingspan isn't important.", "Because eagles are born first.", "Because the standard 'birth record' (name, habitat) must be created before adding custom fields."],
+              "answerIndex": 2,
+              "hint": "We build the foundation before we build the roof."
+            },
+            "syntaxLesson": [
+              { "speaker": "priya", "text": "In Python, the 'birth record' is called `__init__` (the constructor)." },
+              { "speaker": "pip", "text": "Hoo! And we use `super()` here too, right?" },
+              { "speaker": "priya", "text": "Exactly. The child's `__init__` must call `super().__init__(...)` to pass the standard fields up to the parent to handle, before the child handles its own custom fields." }
+            ],
             "codeReveal": {
               "file": "constructor_inheritance.py",
               "template": "class Animal:\n    def __init__(self, name, habitat):\n        self.name = name\n        self.habitat = habitat\n\nclass Eagle(Animal):\n    def __init__(self, name, habitat, wingspan):\n        ____.__init__(name, habitat)  # standard fields first\n        self.wingspan = wingspan       # then Eagle's extra field\n\ne = Eagle(\"Eddie\", \"mountains\", 2.1)\nprint(e.name)      # Eddie    ← from Animal\nprint(e.wingspan)  # 2.1      ← Eagle's own",
@@ -197,10 +258,21 @@
               "If a Bird inherits from Animal, does it need to redefine 'breathe'? What about the Eagle?"
             ],
             "expectedInsight": "Learner understands multi-level inheritance: a child can inherit from a parent that itself is a child, automatically getting traits from all ancestors.",
+            "mcq": {
+              "question": "If Eagle inherits from Bird, and Bird inherits from Animal, what traits does Eagle automatically get?",
+              "options": ["Only Bird's traits.", "Only Animal's traits.", "Both Bird's and Animal's traits."],
+              "answerIndex": 2,
+              "hint": "Traits pass down through the whole chain."
+            },
+            "syntaxLesson": [
+              { "speaker": "priya", "text": "Multi-level inheritance works naturally in Python." },
+              { "speaker": "pip", "text": "Hoo! You just keep passing the baton down the line!" },
+              { "speaker": "priya", "text": "`class Bird(Animal):` makes Bird a child of Animal. Then `class Eagle(Bird):` makes Eagle a child of Bird, inheriting everything from BOTH." }
+            ],
             "codeReveal": {
               "file": "multilevel.py",
-              "template": "class Animal:\n    def breathe(self): print(\"breathing\")\n\nclass Bird(____):\n    def lay_eggs(self): print(\"laying eggs\")\n\nclass Eagle(____):\n    def soar(self): print(\"soaring\")\n\ne = Eagle()\ne.breathe()   # from Animal\ne.lay_eggs()  # from Bird",
-              "blanks": [{ "placeholder": "????", "answer": "Animal", "hint": "What does Bird inherit from?" }],
+              "template": "class Animal:\n    def breathe(self): print(\"breathing\")\n\nclass Bird(____):\n    def lay_eggs(self): print(\"laying eggs\")\n\nclass Eagle(Bird):\n    def soar(self): print(\"soaring\")\n\ne = Eagle()\ne.breathe()   # from Animal\ne.lay_eggs()  # from Bird",
+              "blanks": [{ "placeholder": "????", "answer": "Animal", "hint": "What does Bird inherit from in the chain?" }],
               "explanation": "In multi-level inheritance, a class inherits from another derived class. Eagle gets methods from both Bird and Animal automatically."
             }
           }
