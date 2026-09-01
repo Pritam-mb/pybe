@@ -173,9 +173,9 @@ const CaseStudyOne = ({ onScoreUpdate, resetSignal, onBack, onComplete, onProcee
             <p className="text-slate-300"><strong>Iteration (Loops):</strong> Just like playing ball after ball in a cricket over, a program repeats actions until a goal is met. Every loop has three parts:</p>
             
             <ul className="list-disc pl-5 text-slate-300 space-y-3 mt-6">
-              <li><strong>Condition (The Target):</strong> When does the repetition stop? <em>(e.g., Stop when 6 balls are bowled, or when 15 runs are scored).</em></li>
-              <li><strong>Repeated Action (The Play):</strong> What happens each time? <em>(e.g., The bowler bowls a ball, the batsman hits it).</em></li>
-              <li><strong>Update Step (The Scoreboard):</strong> What changes after each action? <em>(e.g., Ball count increases, or runs are added).</em></li>
+              <li><strong>Condition (The Target):</strong> <em>Stop when 6 balls are bowled, or when 15 runs are scored.</em></li>
+              <li><strong>Repeated Action (The Play):</strong> <em>The bowler bowls a ball, the batsman hits it.</em></li>
+              <li><strong>Update Step (The Scoreboard):</strong> <em>Ball count increases, or runs are added.</em></li>
             </ul>
           </div>
         );
@@ -184,7 +184,6 @@ const CaseStudyOne = ({ onScoreUpdate, resetSignal, onBack, onComplete, onProcee
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white mb-4">The Cricket Loop: Bowler</h2>
             <div className="bg-blue-900/20 border-l-4 border-blue-500 p-6 rounded-r my-4 shadow-lg shadow-blue-500/10 space-y-4">
-              <h3 className="text-xl font-bold text-blue-400 mb-2">The Bowler's Loop (Fixed)</h3>
               <p className="text-lg text-slate-300">The bowler has a very clear set of rules.</p>
               <p className="text-lg text-slate-300">His <strong>repeated action</strong> is running up to the crease and bowling a delivery.</p>
               <p className="text-lg text-slate-300">His <strong>condition</strong> is to repeat this exactly until 6 legal deliveries are completed.</p>
@@ -199,7 +198,6 @@ const CaseStudyOne = ({ onScoreUpdate, resetSignal, onBack, onComplete, onProcee
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white mb-4">The Cricket Loop: Batsmen</h2>
             <div className="bg-emerald-900/20 border-l-4 border-emerald-500 p-6 rounded-r my-4 shadow-lg shadow-emerald-500/10 space-y-4">
-              <h3 className="text-xl font-bold text-emerald-400 mb-2">The Batsmen's Loop (Dynamic)</h3>
               <p className="text-lg text-slate-300">The batsmen face a completely different challenge.</p>
               <p className="text-lg text-slate-300">Their <strong>repeated action</strong> is hitting the ball and trying to score runs.</p>
               <p className="text-lg text-slate-300">However, their <strong>condition</strong> is dynamic: they must keep playing <em>until</em> they score 15 runs.</p>
