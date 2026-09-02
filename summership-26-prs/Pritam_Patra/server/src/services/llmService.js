@@ -1,4 +1,4 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 
 const SYSTEM_INSTRUCTIONS = `You are an adaptive learning evaluator for a visual-novel style learning app.
 The learner is exploring a story-based saga about a zoologist discovering programming concepts through wildlife observation.
@@ -14,7 +14,7 @@ STRICT RULES:
 - Tone: warm, curious, like a wise companion in a story — Pip the owl's voice
 - If answer is partially correct: push deeper, don't reject
 
-Respond ONLY in this exact JSON format:
+Respond ONLY in this exact JSON format (no markdown, no code fences — raw JSON only):
 {
   "understood": true or false,
   "encouragement": "short warm message when understood=true (null if false)",
@@ -23,17 +23,13 @@ Respond ONLY in this exact JSON format:
 }`;
 
 async function evaluate({ actNumber, actName, arcName, concept, storyBeat, questions, expectedInsight, userAnswer }) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
 
-  if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+  if (!apiKey || apiKey === 'your_groq_api_key_here') {
     return localEvaluate({ actNumber, userAnswer });
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
-    systemInstruction: SYSTEM_INSTRUCTIONS
-  });
+  const groq = new Groq({ apiKey });
 
   const userMessage = `
 ACT ${actNumber}: "${actName}" (${arcName} Arc)
@@ -46,12 +42,21 @@ LEARNER'S ANSWER: "${userAnswer}"
 Evaluate and respond in the required JSON format.`;
 
   try {
-    const result = await model.generateContent(userMessage);
-    const text = result.response.text().trim();
-    const jsonText = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '');
-    return JSON.parse(jsonText);
+    const completion = await groq.chat.completions.create({
+      model: 'openai/gpt-oss-120b',
+      messages: [
+        { role: 'system', content: SYSTEM_INSTRUCTIONS },
+        { role: 'user', content: userMessage }
+      ],
+      temperature: 0.3,
+      max_tokens: 512,
+      response_format: { type: 'json_object' }
+    });
+
+    const text = completion.choices[0]?.message?.content?.trim();
+    return JSON.parse(text);
   } catch (err) {
-    console.error('LLM evaluation error:', err.message);
+    console.error('Groq LLM evaluation error:', err.message);
     return localEvaluate({ actNumber, userAnswer });
   }
 }
@@ -101,7 +106,7 @@ function localEvaluate({ actNumber, userAnswer }) {
     2: { q: 'Finish this sentence: "The eagle can do everything any animal can do, AND it can also..."', miss: 'Try describing both parts — what the eagle shares AND what only the eagle has.' },
     3: { q: 'Think of something you know in real life where one thing gets all the properties of another and adds its own. A car and a sports car? A phone and a smartphone?', miss: 'Try to think of a real-world pair where one thing "inherits" from another.' },
     5: { q: 'The chameleon eating with a tongue-flick — is it adding a brand new behaviour, or doing an existing behaviour (eating) in its own unique way?', miss: 'Focus on whether the chameleon is doing something new, or replacing how an existing trait works.' },
-    6: { q: 'Before the tongue-flick, the chameleon still opens its mouth like every animal. Does it throw away the normal eating pattern, or use it first and then add to it?', miss: 'Notice that the chameleon uses the normal pattern FIRST, then adds. It doesn\'t throw the original away.' },
+    6: { q: 'Before the tongue-flick, the chameleon still opens its mouth like every animal. Does it throw away the normal eating pattern, or use it first and then add to it?', miss: "Notice that the chameleon uses the normal pattern FIRST, then adds. It doesn't throw the original away." },
     7: { q: 'When a new eagle is first catalogued, which fields does it need — just its own (wingspan), or the standard animal fields too (name, habitat)? In what order would you fill them?', miss: 'Think about which information comes from the general animal pattern and which is eagle-specific. Order matters.' }
   };
 
@@ -111,12 +116,12 @@ function localEvaluate({ actNumber, userAnswer }) {
   }
 
   const encouragements = {
-    1: 'Exactly! You spotted the shared foundation — the traits that belong to every animal.',
-    2: 'Perfect. You saw both parts — the shared foundation AND the eagle\'s unique addition.',
-    3: 'Great example! You\'ve mapped the pattern to a new context.',
-    5: 'Yes! The chameleon is doing the same behaviour — just its own way. That\'s the key insight.',
-    6: 'Exactly right — use the original first, then layer your own on top.',
-    7: 'Spot on! The shared fields come first, then the eagle-specific ones. Order is everything.'
+    1: "Exactly! You spotted the shared foundation — the traits that belong to every animal.",
+    2: "Perfect. You saw both parts — the shared foundation AND the eagle's unique addition.",
+    3: "Great example! You've mapped the pattern to a new context.",
+    5: "Yes! The chameleon is doing the same behaviour — just its own way. That's the key insight.",
+    6: "Exactly right — use the original first, then layer your own on top.",
+    7: "Spot on! The shared fields come first, then the eagle-specific ones. Order is everything."
   };
 
   return { understood: true, encouragement: encouragements[actNumber] || 'Well observed!', misconception: null, followUpQuestion: null };

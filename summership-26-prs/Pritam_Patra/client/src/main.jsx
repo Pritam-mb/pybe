@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 
@@ -18,7 +18,7 @@ function ChapterCard({ arcLabel, actNumber, actName, concept, onStart }) {
   const [leaving, setLeaving] = useState(false);
   function handleStart() {
     setLeaving(true);
-    setTimeout(onStart, 400); // match animation duration
+    setTimeout(onStart, 400);
   }
   return (
     <div className={`chapter-card-overlay ${leaving ? 'leaving' : ''}`}>
@@ -42,7 +42,7 @@ function DialogueBox({ speaker, text, avatarStr, onComplete, isLast }) {
     setDisplayedText('');
     setIsTyping(true);
     let i = 0;
-    const speed = speaker.name === 'Narrator' ? 25 : 35;
+    const speed = speaker.name === 'Narrator' ? 22 : 28;
     const interval = setInterval(() => {
       setDisplayedText(text.substring(0, i + 1));
       i++;
@@ -65,17 +65,17 @@ function DialogueBox({ speaker, text, avatarStr, onComplete, isLast }) {
 
   const isNarrator = speaker.name === 'Narrator';
   const isPip = speaker.name === 'Pip';
-  
-  let avatarClass = "char-avatar";
-  if (isNarrator) avatarClass += " narrator";
-  if (isPip) avatarClass += " pip";
 
-  let nameClass = "char-name";
-  if (isNarrator) nameClass += " narrator";
-  if (isPip) nameClass += " pip";
+  let avatarClass = 'char-avatar';
+  if (isNarrator) avatarClass += ' narrator';
+  if (isPip) avatarClass += ' pip';
 
-  let textClass = "dialogue-text";
-  if (isNarrator) textClass += " narrator-style";
+  let nameClass = 'char-name';
+  if (isNarrator) nameClass += ' narrator';
+  if (isPip) nameClass += ' pip';
+
+  let textClass = 'dialogue-text';
+  if (isNarrator) textClass += ' narrator-style';
 
   return (
     <div className="dialogue-area" onClick={handleAdvance} style={{ cursor: 'pointer' }}>
@@ -100,6 +100,193 @@ function DialogueBox({ speaker, text, avatarStr, onComplete, isLast }) {
   );
 }
 
+// ── Wrong Answer Understanding Window ────────────────────────────────
+function WrongAnswerWindow({ correction, onRetry }) {
+  return (
+    <div className="wrong-answer-window">
+      <div className="waw-header">
+        <span className="waw-owl">🦉</span>
+        <div className="waw-header-text">
+          <div className="waw-title">Let's Think This Through Together</div>
+          <div className="waw-subtitle">Pip the Owl has some thoughts for you...</div>
+        </div>
+      </div>
+
+      {correction.misconception && (
+        <div className="waw-section waw-miss">
+          <div className="waw-section-label">📌 What was missing from your answer:</div>
+          <div className="waw-section-body">{correction.misconception}</div>
+        </div>
+      )}
+
+      <div className="waw-section waw-guide">
+        <div className="waw-section-label">🔍 Try thinking about it this way:</div>
+        <div className="waw-followup-q">{correction.followUpQuestion}</div>
+      </div>
+
+      <div className="waw-footer">
+        <div className="waw-tip">
+          💡 Struggling with this is part of discovering the concept. Take your time — the answer is already in the story.
+        </div>
+        <button className="btn-submit" onClick={onRetry}>
+          ↩ Try Again
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Reasoning Capture (after correct observation) ─────────────────────
+function ReasoningCapture({ onSubmit }) {
+  const [text, setText] = useState('');
+
+  return (
+    <div className="reasoning-window">
+      <div className="reasoning-header">
+        <span className="reasoning-star">✨</span>
+        <div>
+          <div className="reasoning-title">Excellent Observation!</div>
+          <div className="reasoning-sub">You got it. But before we move on...</div>
+        </div>
+      </div>
+
+      <div className="reasoning-body">
+        <div className="reasoning-question">
+          How did you figure that out?
+        </div>
+        <div className="reasoning-hint">
+          Describe the thinking process you used — what clues did you look for? What did you compare?
+          This helps you build a <strong>reasoning pattern</strong> you can apply to any new problem.
+        </div>
+        <textarea
+          className="obs-textarea"
+          style={{ minHeight: '90px' }}
+          placeholder="I noticed that... / I figured it out by comparing... / My approach was..."
+          value={text}
+          onChange={e => setText(e.target.value)}
+          autoFocus
+        />
+        <div className="reasoning-actions">
+          <button
+            className="btn-submit"
+            onClick={() => onSubmit(text)}
+            disabled={!text.trim()}
+          >
+            Continue →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Story Bridge Phase (after MCQ, before slides) ────────────────────
+// Reuses DialogueBox — feels like the story is still going
+function StoryBridgePhase({ storyBridge, saga, onComplete }) {
+  const [idx, setIdx] = useState(0);
+
+  const current = storyBridge[idx];
+  const speaker = saga.characters[current.speaker];
+
+  const handleNext = () => {
+    if (idx < storyBridge.length - 1) {
+      setIdx(i => i + 1);
+    } else {
+      onComplete();
+    }
+  };
+
+  return (
+    <DialogueBox
+      speaker={speaker}
+      text={current.text}
+      avatarStr={speaker.avatar}
+      isLast={idx === storyBridge.length - 1}
+      onComplete={handleNext}
+    />
+  );
+}
+
+// ── Slide Teacher (step-by-step code teaching) ────────────────────────
+function SlideTeacher({ slides, filename, onComplete }) {
+  const [slideIdx, setSlideIdx] = useState(0);
+  const slide = slides[slideIdx];
+  const isLast = slideIdx === slides.length - 1;
+
+  const lines = slide.code.split('\n');
+  const highlights = slide.highlightWords || [];
+
+  const isHighlightedLine = (line) =>
+    highlights.some(word => line.includes(word));
+
+  return (
+    <div className="slide-teacher">
+      {/* ── Step indicator ── */}
+      <div className="slide-header">
+        <div className="slide-step-pill">
+          Step {slideIdx + 1} of {slides.length}
+        </div>
+        <div className="slide-title">{slide.slideTitle}</div>
+      </div>
+
+      {/* ── Story connection quote ── */}
+      <div className="slide-story-quote">
+        <span className="slide-quote-icon">💬</span>
+        <span className="slide-quote-text">{slide.storyConnection}</span>
+      </div>
+
+      {/* ── Code window ── */}
+      <div className="code-window slide-code-window">
+        <div className="code-titlebar">
+          <div className="cdot r" /><div className="cdot a" /><div className="cdot g" />
+          <span className="code-filename">{filename}</span>
+          <span className="cdp-badge" style={{ marginLeft: 'auto' }}>read only</span>
+        </div>
+        <div className="code-body">
+          {lines.map((line, i) => (
+            <div
+              key={i}
+              className={`code-line ${isHighlightedLine(line) ? 'st-highlight-line' : ''}`}
+            >
+              {line || '\u00a0'}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Explanation ── */}
+      <div className="slide-explanation">
+        <span className="cdp-exp-icon">💡</span>
+        <span>{slide.explanation}</span>
+      </div>
+
+      {/* ── Navigation ── */}
+      <div className="slide-nav">
+        {slideIdx > 0 && (
+          <button
+            className="slide-back-btn"
+            onClick={() => setSlideIdx(i => i - 1)}
+          >
+            ← Previous
+          </button>
+        )}
+        {!isLast ? (
+          <button
+            className="chapter-btn"
+            onClick={() => setSlideIdx(i => i + 1)}
+          >
+            Next Step →
+          </button>
+        ) : (
+          <button className="chapter-btn" onClick={onComplete}>
+            ✏️ Now Write It Yourself!
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Observation Input ────────────────────────────────────────────────
 function ObservationInput({ prompt, questions, onSubmit, loading }) {
   const [answer, setAnswer] = useState('');
@@ -108,6 +295,7 @@ function ObservationInput({ prompt, questions, onSubmit, loading }) {
     e.preventDefault();
     if (!answer.trim() || loading) return;
     onSubmit(answer);
+    setAnswer('');
   }
 
   return (
@@ -118,7 +306,7 @@ function ObservationInput({ prompt, questions, onSubmit, loading }) {
           <div>{prompt}</div>
         </div>
       )}
-      
+
       <div className="question-chips">
         {questions.map((q, i) => (
           <div className="question-chip" key={i}>
@@ -129,7 +317,7 @@ function ObservationInput({ prompt, questions, onSubmit, loading }) {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <textarea 
+        <textarea
           className="obs-textarea"
           placeholder="Type your observation..."
           value={answer}
@@ -138,7 +326,7 @@ function ObservationInput({ prompt, questions, onSubmit, loading }) {
         />
         <div className="obs-actions">
           <button className="btn-submit" type="submit" disabled={!answer.trim() || loading}>
-            {loading ? <><div className="spin"/> Evaluating...</> : 'Record in Journal'}
+            {loading ? <><div className="spin" /> Evaluating...</> : 'Record in Journal'}
           </button>
         </div>
       </form>
@@ -146,14 +334,13 @@ function ObservationInput({ prompt, questions, onSubmit, loading }) {
   );
 }
 
-// ── Pip Correction ───────────────────────────────────────────────────
-function OwlCorrection({ misconception, question }) {
+// ── Pip Retry Reminder (shows above obs input on retry) ──────────────
+function OwlRetryReminder({ question }) {
   return (
     <div className="owl-correction">
       <div className="owl-avatar">🦉</div>
       <div className="owl-body">
-        <div className="owl-name">Pip the Owl</div>
-        {misconception && <div className="owl-misconception">{misconception}</div>}
+        <div className="owl-name">Pip's Guiding Question</div>
         <div className="owl-question">{question}</div>
       </div>
     </div>
@@ -183,11 +370,11 @@ function McqPanel({ mcq, onCorrect }) {
       <div className="mcq-question">{mcq.question}</div>
       <div className="mcq-options">
         {mcq.options.map((opt, i) => {
-          let cls = "mcq-option";
+          let cls = 'mcq-option';
           if (selectedIdx === i) {
-            cls += status === 'correct' ? " correct" : (status === 'wrong' ? " wrong" : "");
+            cls += status === 'correct' ? ' correct' : status === 'wrong' ? ' wrong' : '';
           } else if (status === 'correct' && i === mcq.answerIndex) {
-            cls += " correct";
+            cls += ' correct';
           }
           return (
             <button key={i} className={cls} onClick={() => handleSelect(i)} disabled={status === 'correct'}>
@@ -197,8 +384,13 @@ function McqPanel({ mcq, onCorrect }) {
         })}
       </div>
       {showHint && status === 'wrong' && (
-        <div style={{marginTop:'1rem'}}>
-          <OwlCorrection misconception="Not quite." question={mcq.hint} />
+        <div className="owl-correction" style={{ marginTop: '1rem' }}>
+          <div className="owl-avatar">🦉</div>
+          <div className="owl-body">
+            <div className="owl-name">Pip the Owl</div>
+            <div className="owl-misconception">Not quite — look at the options again.</div>
+            <div className="owl-question">{mcq.hint}</div>
+          </div>
         </div>
       )}
     </div>
@@ -208,10 +400,11 @@ function McqPanel({ mcq, onCorrect }) {
 // ── Code Solve ───────────────────────────────────────────────────────
 function CodeSolve({ codeReveal, onSolve }) {
   const [blankValue, setBlankValue] = useState('');
-  const [status, setStatus] = useState(null); // 'correct' | 'wrong' | null
+  const [status, setStatus] = useState(null);
   const [showHint, setShowHint] = useState(false);
+  const [attempts, setAttempts] = useState(0);
 
-  const blankDef = codeReveal.blanks[0]; // Currently supporting one blank per act
+  const blankDef = codeReveal.blanks[0];
 
   function handleCheck() {
     if (blankValue.trim() === blankDef.answer) {
@@ -219,6 +412,7 @@ function CodeSolve({ codeReveal, onSolve }) {
       setTimeout(onSolve, 1500);
     } else {
       setStatus('wrong');
+      setAttempts(a => a + 1);
       setTimeout(() => setStatus(null), 1500);
     }
   }
@@ -228,13 +422,14 @@ function CodeSolve({ codeReveal, onSolve }) {
   return (
     <div className="code-solve">
       <div className="code-intro">
-        Let's translate that observation into Python. Fill in the missing piece.
+        You've seen how Python writes this. Now fill in the missing piece <strong>yourself</strong>.
       </div>
 
       <div className="code-window">
         <div className="code-titlebar">
-          <div className="cdot r"/><div className="cdot a"/><div className="cdot g"/>
+          <div className="cdot r" /><div className="cdot a" /><div className="cdot g" />
           <span className="code-filename">{codeReveal.file}</span>
+          <span className="cdp-badge" style={{ marginLeft: 'auto' }}>editable</span>
         </div>
         <div className="code-body">
           {lines.map((line, i) => {
@@ -249,22 +444,23 @@ function CodeSolve({ codeReveal, onSolve }) {
                     onChange={e => { setBlankValue(e.target.value); setStatus(null); }}
                     placeholder={blankDef.placeholder}
                     spellCheck={false}
+                    autoFocus
                   />
                   {parts[1]}
                 </div>
               );
             }
-            return <div key={i} className="code-line">{line}</div>;
+            return <div key={i} className="code-line">{line || '\u00a0'}</div>;
           })}
         </div>
       </div>
 
       {status === 'wrong' && (
-        <div style={{color:'var(--red)', fontSize:'0.85rem', marginBottom:'0.85rem'}}>
-          ❌ Not quite. Look closely at the pattern you described.
+        <div style={{ color: 'var(--red)', fontSize: '0.85rem', marginBottom: '0.85rem' }}>
+          ❌ Not quite — think back to the concept doc you just read.
         </div>
       )}
-      
+
       {status === 'correct' && (
         <div className="code-explanation">
           <strong>✅ Correct!</strong> {codeReveal.explanation}
@@ -273,14 +469,15 @@ function CodeSolve({ codeReveal, onSolve }) {
 
       {status !== 'correct' && (
         <>
-          {!showHint ? (
+          {attempts >= 1 && !showHint && (
             <div className="hint-pill" onClick={() => setShowHint(true)}>💡 Need a hint?</div>
-          ) : (
+          )}
+          {showHint && (
             <div className="hint-text">💡 <strong>Hint:</strong> {blankDef.hint}</div>
           )}
-          <div style={{display:'flex', justifyContent:'flex-end'}}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button className="btn-submit" onClick={handleCheck} disabled={!blankValue.trim()}>
-              Run Code
+              Run Code ▶
             </button>
           </div>
         </>
@@ -291,7 +488,7 @@ function CodeSolve({ codeReveal, onSolve }) {
 
 // ── Field Journal Sidebar ────────────────────────────────────────────
 function FieldJournal({ saga, currentActNumber, completedActs, xp }) {
-  if (!saga) return <div className="field-journal"/>;
+  if (!saga) return <div className="field-journal" />;
 
   return (
     <div className="field-journal">
@@ -312,11 +509,11 @@ function FieldJournal({ saga, currentActNumber, completedActs, xp }) {
               const isDone = completedActs.includes(act.act);
               const isActive = act.act === currentActNumber;
               const isLocked = !isDone && !isActive;
-              
-              let cls = "act-entry ";
-              if (isDone) cls += "done";
-              if (isActive) cls += "active";
-              if (isLocked) cls += "locked";
+
+              let cls = 'act-entry ';
+              if (isDone) cls += 'done';
+              if (isActive) cls += 'active';
+              if (isLocked) cls += 'locked';
 
               return (
                 <div key={act.act} className={cls}>
@@ -339,18 +536,22 @@ function FieldJournal({ saga, currentActNumber, completedActs, xp }) {
 function App() {
   const [saga, setSaga] = useState(null);
   const [allActs, setAllActs] = useState([]);
-  
+
   // State Machine
-  // Modes: 'intro' -> 'narrating' -> 'observation' -> 'evaluating' -> 'mcq' -> 'syntax' -> 'code' -> 'success'
+  // Modes: 'intro' → 'narrating' → 'observation' → 'evaluating'
+  //        → 'wrong-answer' (show why) → 'observation' (retry)
+  //        → 'reasoning' (how did you solve it?) → 'mcq'
+  //        → 'story-bridge' (Priya/Pip connect story to Python) ← NEW
+  //        → 'slide-teach' (step-by-step code slides) ← NEW
+  //        → 'code' → 'success'
   const [actIndex, setActIndex] = useState(0);
-  const [mode, setMode] = useState('intro'); 
-  
-  // Narrative & Lesson State
+  const [mode, setMode] = useState('intro');
+  const [bridgeIdx, setBridgeIdx] = useState(0);
+
   const [dialogueIndex, setDialogueIndex] = useState(0);
-  const [lessonIndex, setLessonIndex] = useState(0);
   const [correction, setCorrection] = useState(null);
-  
-  // Journal & XP State
+  const [retryQuestion, setRetryQuestion] = useState(null);
+
   const [completedActs, setCompletedActs] = useState([]);
   const [xp, setXp] = useState(0);
 
@@ -360,15 +561,15 @@ function App() {
       apiFetch('/journey/acts')
     ]).then(([s, acts]) => {
       setSaga(s);
-      setAllActs(acts.sort((a,b) => a.act - b.act));
+      setAllActs(acts.sort((a, b) => a.act - b.act));
     }).catch(console.error);
   }, []);
 
-  if (!saga) return <div className="loading-screen"><div className="spin"/>Loading Saga...</div>;
+  if (!saga) return <div className="loading-screen"><div className="spin" />Loading Saga...</div>;
 
   const currentAct = allActs[actIndex];
-  
-  // Handle Saga Complete
+
+  // Saga Complete screen
   if (!currentAct) {
     return (
       <div className="app">
@@ -379,16 +580,16 @@ function App() {
         </div>
         <div className="story-area">
           <div className="scene">
-             <div className="saga-complete">
-               <span className="saga-trophy">🏆</span>
-               <div className="saga-title">Saga Complete</div>
-               <div className="saga-subtitle">You have discovered the core patterns of Object-Oriented Inheritance.</div>
-               <div className="saga-stats">
-                 <div className="stat-box"><strong>{completedActs.length}</strong><span>Acts Completed</span></div>
-                 <div className="stat-box"><strong>{xp}</strong><span>Total XP</span></div>
-               </div>
-               <button className="chapter-btn" onClick={() => window.location.reload()}>Play Again</button>
-             </div>
+            <div className="saga-complete">
+              <span className="saga-trophy">🏆</span>
+              <div className="saga-title">Saga Complete</div>
+              <div className="saga-subtitle">You have discovered the core patterns of Object-Oriented Inheritance.</div>
+              <div className="saga-stats">
+                <div className="stat-box"><strong>{completedActs.length}</strong><span>Acts Completed</span></div>
+                <div className="stat-box"><strong>{xp}</strong><span>Total XP</span></div>
+              </div>
+              <button className="chapter-btn" onClick={() => window.location.reload()}>Play Again</button>
+            </div>
           </div>
         </div>
         <FieldJournal saga={saga} currentActNumber={999} completedActs={completedActs} xp={xp} />
@@ -399,20 +600,13 @@ function App() {
   const arcInfo = saga.arcs.find(a => a.arc === currentAct.arcNumber);
 
   // ── Actions ──
-  
+
   const handleDialogueComplete = () => {
     if (dialogueIndex < currentAct.narrative.length - 1) {
       setDialogueIndex(i => i + 1);
     } else {
+      setRetryQuestion(null);
       setMode(currentAct.observationPrompt ? 'observation' : 'mcq');
-    }
-  };
-
-  const handleLessonComplete = () => {
-    if (lessonIndex < currentAct.syntaxLesson.length - 1) {
-      setLessonIndex(i => i + 1);
-    } else {
-      setMode('code');
     }
   };
 
@@ -426,20 +620,34 @@ function App() {
       });
       if (result.understood) {
         setCorrection(null);
-        setMode(currentAct.mcq ? 'mcq' : (currentAct.codeReveal ? 'code' : 'success'));
+        setRetryQuestion(null);
+        setMode('reasoning'); // Step: ask HOW they solved it
       } else {
         setCorrection(result);
-        setMode('observation');
+        setMode('wrong-answer'); // Step: show understanding window
       }
     } catch (err) {
       console.error(err);
-      setMode('observation'); // Fallback on error
+      setMode('observation');
     }
   };
 
-  const handleMcqCorrect = () => {
-    if (currentAct.codeReveal && currentAct.syntaxLesson) {
-      setMode('syntax');
+  // From wrong-answer window → retry observation with follow-up question
+  const handleWrongAnswerRetry = () => {
+    setRetryQuestion(correction.followUpQuestion);
+    setCorrection(null);
+    setMode('observation');
+  };
+
+  // After reasoning is submitted → proceed to MCQ or next phase
+  const handleReasoningSubmit = (_reasoning) => {
+    if (currentAct.mcq) {
+      setMode('mcq');
+    } else if (currentAct.storyBridge?.length) {
+      setBridgeIdx(0);
+      setMode('story-bridge');
+    } else if (currentAct.syntaxLesson?.length) {
+      setMode('slide-teach');
     } else if (currentAct.codeReveal) {
       setMode('code');
     } else {
@@ -447,9 +655,35 @@ function App() {
     }
   };
 
-  const handleCodeSolve = () => {
-    handleSuccessState();
+  // After MCQ correct → story bridge (if exists) → slides → code
+  const handleMcqCorrect = () => {
+    if (currentAct.storyBridge?.length) {
+      setBridgeIdx(0);
+      setMode('story-bridge');
+    } else if (currentAct.syntaxLesson?.length) {
+      setMode('slide-teach');
+    } else if (currentAct.codeReveal) {
+      setMode('code');
+    } else {
+      handleSuccessState();
+    }
   };
+
+  // After story bridge dialogues → go to slide teaching
+  const handleStoryBridgeDone = () => {
+    setMode('slide-teach');
+  };
+
+  // After all slides are done → code challenge (if exists) or success
+  const handleSlideTeachDone = () => {
+    if (currentAct.codeReveal) {
+      setMode('code');
+    } else {
+      handleSuccessState();
+    }
+  };
+
+  const handleCodeSolve = () => handleSuccessState();
 
   const handleSuccessState = () => {
     setXp(prev => prev + 100);
@@ -460,20 +694,22 @@ function App() {
     setCompletedActs(prev => [...prev, currentAct.act]);
     setActIndex(i => i + 1);
     setDialogueIndex(0);
-    setLessonIndex(0);
     setCorrection(null);
+    setRetryQuestion(null);
+    setBridgeIdx(0);
     setMode('intro');
   };
 
   const currentDialogue = currentAct.narrative[dialogueIndex];
-  const currentLesson = currentAct.syntaxLesson ? currentAct.syntaxLesson[lessonIndex] : null;
   const speaker = currentDialogue ? saga.characters[currentDialogue.speaker] : null;
-  const lessonSpeaker = currentLesson ? saga.characters[currentLesson.speaker] : null;
+
+  // On retry, replace original questions with follow-up question
+  const displayQuestions = retryQuestion ? [retryQuestion] : currentAct.questions;
 
   return (
     <div className="app">
       {mode === 'intro' && (
-        <ChapterCard 
+        <ChapterCard
           arcLabel={`Arc ${arcInfo.arc} — ${arcInfo.name}`}
           actNumber={currentAct.act}
           actName={currentAct.name}
@@ -487,7 +723,7 @@ function App() {
           <span>PyBe</span> <small>Wildlife Observer</small>
         </div>
         <div className="topbar-arc">
-          <div className="arc-dot" style={{background: arcInfo.color}} />
+          <div className="arc-dot" style={{ background: arcInfo.color }} />
           Arc {arcInfo.arc}: {arcInfo.name}
         </div>
       </div>
@@ -497,59 +733,77 @@ function App() {
           {currentAct.image && (
             <img src={currentAct.image} alt={currentAct.name} className="scene-bg" />
           )}
-           
-          {/* Correction Bubble injected above observation if wrong */}
-          {correction && (
-            <OwlCorrection 
-              misconception={correction.misconception} 
-              question={correction.followUpQuestion} 
+
+          {/* ── WRONG ANSWER: Full understanding panel ── */}
+          {mode === 'wrong-answer' && correction && (
+            <WrongAnswerWindow
+              correction={correction}
+              onRetry={handleWrongAnswerRetry}
             />
           )}
 
-          {/* Observation Panel */}
-          {mode === 'observation' || mode === 'evaluating' ? (
-            <ObservationInput 
+          {/* ── OBSERVATION RETRY: Pip's guiding question reminder ── */}
+          {(mode === 'observation' || mode === 'evaluating') && retryQuestion && (
+            <OwlRetryReminder question={retryQuestion} />
+          )}
+
+          {/* ── REASONING CAPTURE ── */}
+          {mode === 'reasoning' && (
+            <ReasoningCapture onSubmit={handleReasoningSubmit} />
+          )}
+
+          {/* ── OBSERVATION INPUT ── */}
+          {(mode === 'observation' || mode === 'evaluating') && (
+            <ObservationInput
               prompt={currentAct.observationPrompt}
-              questions={currentAct.questions}
+              questions={displayQuestions}
               onSubmit={handleObservationSubmit}
               loading={mode === 'evaluating'}
             />
-          ) : null}
+          )}
 
-          {/* MCQ Panel */}
+          {/* ── MCQ ── */}
           {mode === 'mcq' && currentAct.mcq && (
-            <McqPanel 
+            <McqPanel
               mcq={currentAct.mcq}
               onCorrect={handleMcqCorrect}
             />
           )}
 
-          {/* Code Panel */}
+          {/* ── SLIDE TEACH: Step-by-step code slides ── */}
+          {mode === 'slide-teach' && currentAct.syntaxLesson?.length && (
+            <SlideTeacher
+              slides={currentAct.syntaxLesson}
+              filename={currentAct.codeReveal?.file || currentAct.slidesFile || 'example.py'}
+              onComplete={handleSlideTeachDone}
+            />
+          )}
+
+          {/* ── CODE CHALLENGE ── */}
           {mode === 'code' && currentAct.codeReveal && (
-            <CodeSolve 
+            <CodeSolve
               codeReveal={currentAct.codeReveal}
               onSolve={handleCodeSolve}
             />
           )}
 
-          {/* Success Reveal */}
+          {/* ── SUCCESS ── */}
           {mode === 'success' && (
             <div className="act-success">
-               <span className="success-icon">✅</span>
-               <div className="success-title">Discovery Logged</div>
-               <div className="success-subtitle">You successfully identified the {currentAct.concept} pattern.</div>
-               <div className="xp-badge">
-                 <span className="xp-icon">⭐</span> +100 XP
-               </div>
-               <button className="chapter-btn" onClick={handleNextAct}>Continue Saga ▶</button>
+              <span className="success-icon">✅</span>
+              <div className="success-title">Discovery Logged</div>
+              <div className="success-subtitle">You successfully identified the {currentAct.concept} pattern.</div>
+              <div className="xp-badge">
+                <span className="xp-icon">⭐</span> +100 XP
+              </div>
+              <button className="chapter-btn" onClick={handleNextAct}>Continue Saga ▶</button>
             </div>
           )}
-
         </div>
-        
-        {/* Dialogue Box for Narrative */}
+
+        {/* Narrative Dialogue */}
         {mode === 'narrating' && currentDialogue && (
-          <DialogueBox 
+          <DialogueBox
             speaker={speaker}
             text={currentDialogue.text}
             avatarStr={speaker.avatar}
@@ -558,22 +812,20 @@ function App() {
           />
         )}
 
-        {/* Dialogue Box for Syntax Lesson */}
-        {mode === 'syntax' && currentLesson && (
-          <DialogueBox 
-            speaker={lessonSpeaker}
-            text={currentLesson.text}
-            avatarStr={lessonSpeaker.avatar}
-            isLast={lessonIndex === currentAct.syntaxLesson.length - 1}
-            onComplete={handleLessonComplete}
+        {/* ── STORY BRIDGE: Priya/Pip connect story → Python ── */}
+        {mode === 'story-bridge' && currentAct.storyBridge?.length && (
+          <StoryBridgePhase
+            storyBridge={currentAct.storyBridge}
+            saga={saga}
+            onComplete={handleStoryBridgeDone}
           />
         )}
       </div>
 
-      <FieldJournal 
-        saga={saga} 
-        currentActNumber={currentAct.act} 
-        completedActs={completedActs} 
+      <FieldJournal
+        saga={saga}
+        currentActNumber={currentAct.act}
+        completedActs={completedActs}
         xp={xp}
       />
     </div>
