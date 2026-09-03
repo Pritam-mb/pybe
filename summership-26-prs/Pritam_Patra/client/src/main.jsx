@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 async function apiFetch(path, options) {
   const res = await fetch(`${API}${path}`, {
@@ -65,10 +65,10 @@ function DialogueBox({ speaker, text, avatarStr, onComplete, isLast }) {
 
   const isNarrator = speaker.name === 'Narrator';
   const isPip = speaker.name === 'Pip';
-
-  let avatarClass = 'char-avatar';
-  if (isNarrator) avatarClass += ' narrator';
-  if (isPip) avatarClass += ' pip';
+  
+  let avatarClass = "char-avatar";
+  if (isNarrator) avatarClass += " narrator";
+  if (isPip) avatarClass += " pip";
 
   let nameClass = 'char-name';
   if (isNarrator) nameClass += ' narrator';
@@ -384,13 +384,8 @@ function McqPanel({ mcq, onCorrect }) {
         })}
       </div>
       {showHint && status === 'wrong' && (
-        <div className="owl-correction" style={{ marginTop: '1rem' }}>
-          <div className="owl-avatar">🦉</div>
-          <div className="owl-body">
-            <div className="owl-name">Pip the Owl</div>
-            <div className="owl-misconception">Not quite — look at the options again.</div>
-            <div className="owl-question">{mcq.hint}</div>
-          </div>
+        <div style={{marginTop:'1rem'}}>
+          <OwlCorrection misconception="Not quite." question={mcq.hint} />
         </div>
       )}
     </div>
@@ -399,88 +394,179 @@ function McqPanel({ mcq, onCorrect }) {
 
 // ── Code Solve ───────────────────────────────────────────────────────
 function CodeSolve({ codeReveal, onSolve }) {
+  const [partIndex, setPartIndex] = useState(0);
   const [blankValue, setBlankValue] = useState('');
   const [status, setStatus] = useState(null);
   const [showHint, setShowHint] = useState(false);
   const [attempts, setAttempts] = useState(0);
 
-  const blankDef = codeReveal.blanks[0];
+  const blankDef = codeReveal.blanks[0]; // Currently supporting one blank per act
 
   function handleCheck() {
+    if (!blankDef) {
+      if (isLastPart) {
+        onSolve();
+      } else {
+        setPartIndex(index => index + 1);
+      }
+      return;
+    }
+
     if (blankValue.trim() === blankDef.answer) {
       setStatus('correct');
-      setTimeout(onSolve, 1500);
+
+      setTimeout(() => {
+        if (isLastPart) {
+          onSolve();
+        } else {
+          setPartIndex(index => index + 1);
+          setBlankValue('');
+          setStatus(null);
+          setShowHint(false);
+        }
+      }, 1500);
     } else {
       setStatus('wrong');
-      setAttempts(a => a + 1);
       setTimeout(() => setStatus(null), 1500);
     }
   }
 
-  const lines = codeReveal.template.split('\n');
+  function handleNextPart() {
+    if (isLastPart) {
+      onSolve();
+      return;
+    }
+
+    setPartIndex(index => index + 1);
+    setBlankValue('');
+    setStatus(null);
+    setShowHint(false);
+  }
 
   return (
     <div className="code-solve">
-      <div className="code-intro">
-        You've seen how Python writes this. Now fill in the missing piece <strong>yourself</strong>.
+
+      {/* Progress */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1rem'
+        }}
+      >
+        <div
+          style={{
+            fontSize: '0.78rem',
+            fontWeight: '700',
+            letterSpacing: '0.08em',
+            color: 'var(--text-dim)',
+            textTransform: 'uppercase'
+          }}
+        >
+          Part {partIndex + 1} of {parts.length}
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.4rem' }}>
+          {parts.map((_, index) => (
+            <div
+              key={index}
+              style={{
+                width: '32px',
+                height: '4px',
+                borderRadius: '999px',
+                background:
+                  index <= partIndex
+                    ? 'var(--blue)'
+                    : 'rgba(255,255,255,0.12)'
+              }}
+            />
+          ))}
+        </div>
       </div>
 
+      {/* Part title */}
+      <div className="code-intro">
+        Let's translate that observation into Python. Fill in the missing piece.
+      </div>
+
+      {/* Code */}
       <div className="code-window">
         <div className="code-titlebar">
-          <div className="cdot r" /><div className="cdot a" /><div className="cdot g" />
+          <div className="cdot r"/><div className="cdot a"/><div className="cdot g"/>
           <span className="code-filename">{codeReveal.file}</span>
-          <span className="cdp-badge" style={{ marginLeft: 'auto' }}>editable</span>
         </div>
+
         <div className="code-body">
           {lines.map((line, i) => {
-            if (line.includes('____')) {
-              const parts = line.split('____');
+            if (line.includes('____') && blankDef) {
+              const partsOfLine = line.split('____');
+
               return (
                 <div key={i} className="code-line">
-                  {parts[0]}
+                  {partsOfLine[0]}
+
                   <input
                     className={`blank-input ${status || ''}`}
                     value={blankValue}
-                    onChange={e => { setBlankValue(e.target.value); setStatus(null); }}
+                    onChange={e => {
+                      setBlankValue(e.target.value);
+                      setStatus(null);
+                    }}
                     placeholder={blankDef.placeholder}
                     spellCheck={false}
                     autoFocus
                   />
-                  {parts[1]}
+
+                  {partsOfLine[1]}
                 </div>
               );
             }
-            return <div key={i} className="code-line">{line || '\u00a0'}</div>;
+            return <div key={i} className="code-line">{line}</div>;
           })}
         </div>
       </div>
 
+      {/* Explanation */}
+      <div
+        style={{
+          marginTop: '1rem',
+          marginBottom: '1rem',
+          color: 'var(--text-dim)',
+          fontSize: '0.9rem',
+          lineHeight: '1.6'
+        }}
+      >
+        {currentPart.explanation}
+      </div>
+
+      {/* Wrong answer */}
       {status === 'wrong' && (
-        <div style={{ color: 'var(--red)', fontSize: '0.85rem', marginBottom: '0.85rem' }}>
-          ❌ Not quite — think back to the concept doc you just read.
+        <div style={{color:'var(--red)', fontSize:'0.85rem', marginBottom:'0.85rem'}}>
+          ❌ Not quite. Look closely at the pattern you described.
         </div>
       )}
-
+      
       {status === 'correct' && (
         <div className="code-explanation">
-          <strong>✅ Correct!</strong> {codeReveal.explanation}
+          <strong>✅ Correct!</strong> Moving to the next part...
         </div>
       )}
 
-      {status !== 'correct' && (
+      {/* Hint */}
+      {blankDef && status !== 'correct' && (
         <>
-          {attempts >= 1 && !showHint && (
+          {!showHint ? (
             <div className="hint-pill" onClick={() => setShowHint(true)}>💡 Need a hint?</div>
-          )}
-          {showHint && (
+          ) : (
             <div className="hint-text">💡 <strong>Hint:</strong> {blankDef.hint}</div>
           )}
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{display:'flex', justifyContent:'flex-end'}}>
             <button className="btn-submit" onClick={handleCheck} disabled={!blankValue.trim()}>
-              Run Code ▶
+              Run Code
             </button>
-          </div>
-        </>
+          )}
+        </div>
       )}
     </div>
   );
@@ -509,11 +595,11 @@ function FieldJournal({ saga, currentActNumber, completedActs, xp }) {
               const isDone = completedActs.includes(act.act);
               const isActive = act.act === currentActNumber;
               const isLocked = !isDone && !isActive;
-
-              let cls = 'act-entry ';
-              if (isDone) cls += 'done';
-              if (isActive) cls += 'active';
-              if (isLocked) cls += 'locked';
+              
+              let cls = "act-entry ";
+              if (isDone) cls += "done";
+              if (isActive) cls += "active";
+              if (isLocked) cls += "locked";
 
               return (
                 <div key={act.act} className={cls}>
@@ -536,7 +622,7 @@ function FieldJournal({ saga, currentActNumber, completedActs, xp }) {
 function App() {
   const [saga, setSaga] = useState(null);
   const [allActs, setAllActs] = useState([]);
-
+  
   // State Machine
   // Modes: 'intro' → 'narrating' → 'observation' → 'evaluating'
   //        → 'wrong-answer' (show why) → 'observation' (retry)
@@ -545,51 +631,64 @@ function App() {
   //        → 'slide-teach' (step-by-step code slides) ← NEW
   //        → 'code' → 'success'
   const [actIndex, setActIndex] = useState(0);
-  const [mode, setMode] = useState('intro');
-  const [bridgeIdx, setBridgeIdx] = useState(0);
-
+  const [mode, setMode] = useState('intro'); 
+  
+  // Narrative & Lesson State
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [correction, setCorrection] = useState(null);
-  const [retryQuestion, setRetryQuestion] = useState(null);
-
+  
+  // Journal & XP State
   const [completedActs, setCompletedActs] = useState([]);
   const [xp, setXp] = useState(0);
 
   useEffect(() => {
+    if (!storyType) return;
+
+    setSaga(null);
+    setAllActs([]);
+    setActIndex(0);
+    setMode('intro');
+    setCorrection(null);
+
     Promise.all([
       apiFetch('/journey'),
       apiFetch('/journey/acts')
     ]).then(([s, acts]) => {
       setSaga(s);
-      setAllActs(acts.sort((a, b) => a.act - b.act));
+      setAllActs(acts.sort((a,b) => a.act - b.act));
     }).catch(console.error);
   }, []);
 
-  if (!saga) return <div className="loading-screen"><div className="spin" />Loading Saga...</div>;
+  if (!saga) return <div className="loading-screen"><div className="spin"/>Loading Saga...</div>;
 
   const currentAct = allActs[actIndex];
-
-  // Saga Complete screen
+  
+  // Handle Saga Complete
   if (!currentAct) {
     return (
       <div className="app">
         <div className="topbar">
           <div className="topbar-brand">
-            <span>PyBe</span> <small>Inheritance Discovery</small>
+            <span>PyBe</span>
+            <small>
+              {storyType === 'polymorphism'
+                ? 'Forest of Many Voices'
+                : 'Wildlife Observer'}
+            </small>
           </div>
         </div>
         <div className="story-area">
           <div className="scene">
-            <div className="saga-complete">
-              <span className="saga-trophy">🏆</span>
-              <div className="saga-title">Saga Complete</div>
-              <div className="saga-subtitle">You have discovered the core patterns of Object-Oriented Inheritance.</div>
-              <div className="saga-stats">
-                <div className="stat-box"><strong>{completedActs.length}</strong><span>Acts Completed</span></div>
-                <div className="stat-box"><strong>{xp}</strong><span>Total XP</span></div>
-              </div>
-              <button className="chapter-btn" onClick={() => window.location.reload()}>Play Again</button>
-            </div>
+             <div className="saga-complete">
+               <span className="saga-trophy">🏆</span>
+               <div className="saga-title">Saga Complete</div>
+               <div className="saga-subtitle">You have discovered the core patterns of Object-Oriented Inheritance.</div>
+               <div className="saga-stats">
+                 <div className="stat-box"><strong>{completedActs.length}</strong><span>Acts Completed</span></div>
+                 <div className="stat-box"><strong>{xp}</strong><span>Total XP</span></div>
+               </div>
+               <button className="chapter-btn" onClick={() => window.location.reload()}>Play Again</button>
+             </div>
           </div>
         </div>
         <FieldJournal saga={saga} currentActNumber={999} completedActs={completedActs} xp={xp} />
@@ -614,7 +713,7 @@ function App() {
     setMode('evaluating');
     setCorrection(null);
     try {
-      const result = await apiFetch('/journey/evaluate', {
+      const result = await apiFetch(`/journey/evaluate?story=${storyType}`, {
         method: 'POST',
         body: JSON.stringify({ actNumber: currentAct.act, userAnswer: answer })
       });
@@ -720,7 +819,14 @@ function App() {
 
       <div className="topbar">
         <div className="topbar-brand">
-          <span>PyBe</span> <small>Wildlife Observer</small>
+          <div className="topbar-brand">
+            <span>PyBe</span>
+            <small>
+              {storyType === 'polymorphism'
+                ? 'Forest of Many Voices'
+                : 'Wildlife Observer'}
+            </small>
+          </div>
         </div>
         <div className="topbar-arc">
           <div className="arc-dot" style={{ background: arcInfo.color }} />
@@ -733,28 +839,18 @@ function App() {
           {currentAct.image && (
             <img src={currentAct.image} alt={currentAct.name} className="scene-bg" />
           )}
-
-          {/* ── WRONG ANSWER: Full understanding panel ── */}
-          {mode === 'wrong-answer' && correction && (
-            <WrongAnswerWindow
-              correction={correction}
-              onRetry={handleWrongAnswerRetry}
+           
+          {/* Correction Bubble injected above observation if wrong */}
+          {correction && (
+            <OwlCorrection 
+              misconception={correction.misconception} 
+              question={correction.followUpQuestion} 
             />
           )}
 
-          {/* ── OBSERVATION RETRY: Pip's guiding question reminder ── */}
-          {(mode === 'observation' || mode === 'evaluating') && retryQuestion && (
-            <OwlRetryReminder question={retryQuestion} />
-          )}
-
-          {/* ── REASONING CAPTURE ── */}
-          {mode === 'reasoning' && (
-            <ReasoningCapture onSubmit={handleReasoningSubmit} />
-          )}
-
-          {/* ── OBSERVATION INPUT ── */}
-          {(mode === 'observation' || mode === 'evaluating') && (
-            <ObservationInput
+          {/* Observation Panel */}
+          {mode === 'observation' || mode === 'evaluating' ? (
+            <ObservationInput 
               prompt={currentAct.observationPrompt}
               questions={displayQuestions}
               onSubmit={handleObservationSubmit}
@@ -800,8 +896,8 @@ function App() {
             </div>
           )}
         </div>
-
-        {/* Narrative Dialogue */}
+        
+        {/* Dialogue Box for Narrative */}
         {mode === 'narrating' && currentDialogue && (
           <DialogueBox
             speaker={speaker}
@@ -812,12 +908,14 @@ function App() {
           />
         )}
 
-        {/* ── STORY BRIDGE: Priya/Pip connect story → Python ── */}
-        {mode === 'story-bridge' && currentAct.storyBridge?.length && (
-          <StoryBridgePhase
-            storyBridge={currentAct.storyBridge}
-            saga={saga}
-            onComplete={handleStoryBridgeDone}
+        {/* Dialogue Box for Syntax Lesson */}
+        {mode === 'syntax' && currentLesson && (
+          <DialogueBox 
+            speaker={lessonSpeaker}
+            text={currentLesson.text}
+            avatarStr={lessonSpeaker.avatar}
+            isLast={lessonIndex === currentAct.syntaxLesson.length - 1}
+            onComplete={handleLessonComplete}
           />
         )}
       </div>
