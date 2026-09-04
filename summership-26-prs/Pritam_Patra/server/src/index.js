@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
-const journeyRouter = require('./routes/journey');
+const sagasRouter = require('./routes/sagas');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -11,7 +11,7 @@ const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 app.use(cors({ origin: CLIENT_ORIGIN }));
 app.use(express.json());
 
-app.use('/api/journey', journeyRouter);
+app.use('/api/sagas', sagasRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
@@ -23,5 +23,5 @@ app.use((err, _req, res, _next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Inheritance Discovery server running on http://localhost:${PORT}`);
+  console.log(`PyBe Discovery server running on http://localhost:${PORT}`);
 });

@@ -13,6 +13,41 @@ async function apiFetch(path, options) {
   return res.json();
 }
 
+// ── Case Study Selector ───────────────────────────────────────────────
+function SagaSelect({ sagas, onSelect }) {
+  return (
+    <div className="saga-select">
+      <div className="saga-select-header">
+        <div className="ss-kicker">PyBe Discovery</div>
+        <h1 className="ss-title">Choose a Case Study</h1>
+        <p className="ss-subtitle">
+          Each saga is a guided story where you discover a computer-science concept
+          yourself — before anyone tells you its name.
+        </p>
+      </div>
+      <div className="saga-grid">
+        {sagas.map((s) => (
+          <button
+            key={s.id}
+            className="saga-card"
+            style={{ '--saga-accent': s.accent }}
+            onClick={() => onSelect(s.id)}
+          >
+            <div className="saga-card-icon">{s.icon}</div>
+            <div className="saga-card-title">{s.title}</div>
+            <div className="saga-card-sub">{s.subtitle}</div>
+            <div className="saga-card-meta">
+              <span>{s.arcCount} Arc{s.arcCount !== 1 ? 's' : ''}</span>
+              <span>{s.actCount} Acts</span>
+            </div>
+            <div className="saga-card-cta">Begin Case Study ▶</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Chapter Card Overlay ──────────────────────────────────────────────
 function ChapterCard({ arcLabel, actNumber, actName, concept, onStart }) {
   const [leaving, setLeaving] = useState(false);
@@ -534,6 +569,8 @@ function FieldJournal({ saga, currentActNumber, completedActs, xp }) {
 
 // ── Main App ─────────────────────────────────────────────────────────
 function App() {
+  const [sagas, setSagas] = useState([]);
+  const [sagaId, setSagaId] = useState(null);
   const [saga, setSaga] = useState(null);
   const [allActs, setAllActs] = useState([]);
 
@@ -556,16 +593,44 @@ function App() {
   const [xp, setXp] = useState(0);
 
   useEffect(() => {
+    apiFetch('/sagas').then(setSagas).catch(console.error);
+  }, []);
+
+  const resetGameState = () => {
+    setActIndex(0);
+    setMode('intro');
+    setBridgeIdx(0);
+    setDialogueIndex(0);
+    setCorrection(null);
+    setRetryQuestion(null);
+    setCompletedActs([]);
+    setXp(0);
+  };
+
+  const handleSelectSaga = (id) => {
+    setSagaId(id);
+    setSaga(null);
+    setAllActs([]);
+    resetGameState();
     Promise.all([
-      apiFetch('/journey'),
-      apiFetch('/journey/acts')
+      apiFetch(`/sagas/${id}`),
+      apiFetch(`/sagas/${id}/acts`)
     ]).then(([s, acts]) => {
       setSaga(s);
       setAllActs(acts.sort((a, b) => a.act - b.act));
     }).catch(console.error);
-  }, []);
+  };
 
-  if (!saga) return <div className="loading-screen"><div className="spin" />Loading Saga...</div>;
+  const handleBackToCaseStudies = () => {
+    setSagaId(null);
+    setSaga(null);
+    setAllActs([]);
+    resetGameState();
+  };
+
+  if (!sagas.length) return <div className="loading-screen"><div className="spin" />Loading PyBe...</div>;
+  if (!sagaId) return <SagaSelect sagas={sagas} onSelect={handleSelectSaga} />;
+  if (!saga) return <div className="loading-screen"><div className="spin" />Loading Case Study...</div>;
 
   const currentAct = allActs[actIndex];
 
@@ -575,7 +640,7 @@ function App() {
       <div className="app">
         <div className="topbar">
           <div className="topbar-brand">
-            <span>PyBe</span> <small>Inheritance Discovery</small>
+            <span>PyBe</span> <small>{saga.title}</small>
           </div>
         </div>
         <div className="story-area">
@@ -583,12 +648,15 @@ function App() {
             <div className="saga-complete">
               <span className="saga-trophy">🏆</span>
               <div className="saga-title">Saga Complete</div>
-              <div className="saga-subtitle">You have discovered the core patterns of Object-Oriented Inheritance.</div>
+              <div className="saga-subtitle">{saga.completeMessage}</div>
               <div className="saga-stats">
                 <div className="stat-box"><strong>{completedActs.length}</strong><span>Acts Completed</span></div>
                 <div className="stat-box"><strong>{xp}</strong><span>Total XP</span></div>
               </div>
-              <button className="chapter-btn" onClick={() => window.location.reload()}>Play Again</button>
+              <div className="saga-actions">
+                <button className="chapter-btn" onClick={() => window.location.reload()}>Play Again</button>
+                <button className="slide-back-btn" onClick={handleBackToCaseStudies}>← All Case Studies</button>
+              </div>
             </div>
           </div>
         </div>
@@ -614,7 +682,7 @@ function App() {
     setMode('evaluating');
     setCorrection(null);
     try {
-      const result = await apiFetch('/journey/evaluate', {
+      const result = await apiFetch(`/sagas/${saga.id}/evaluate`, {
         method: 'POST',
         body: JSON.stringify({ actNumber: currentAct.act, userAnswer: answer })
       });
@@ -720,7 +788,7 @@ function App() {
 
       <div className="topbar">
         <div className="topbar-brand">
-          <span>PyBe</span> <small>Wildlife Observer</small>
+          <span>PyBe</span> <small>{saga.title}</small>
         </div>
         <div className="topbar-arc">
           <div className="arc-dot" style={{ background: arcInfo.color }} />

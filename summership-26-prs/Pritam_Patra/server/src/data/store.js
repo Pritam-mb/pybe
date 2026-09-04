@@ -3,6 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const dbPath = path.join(__dirname, 'db.json');
+const sagasDir = path.join(__dirname, 'sagas');
 
 async function readDb() {
   const raw = await fs.readFile(dbPath, 'utf8');
@@ -13,28 +14,69 @@ async function writeDb(data) {
   await fs.writeFile(dbPath, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
 }
 
-async function getSaga() {
-  const db = await readDb();
-  return db.saga;
+async function readSaga(sagaId) {
+  const filePath = path.join(sagasDir, `${sagaId}.json`);
+  try {
+    const raw = await fs.readFile(filePath, 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
 }
 
-// Flatten all acts from all arcs
-async function getAllActs() {
-  const db = await readDb();
-  return db.saga.arcs.flatMap((arc) =>
-    arc.acts.map((act) => ({ ...act, arcNumber: arc.arc, arcName: arc.name, arcColor: arc.color }))
+// Return light metadata for every saga (for the case-study selector)
+async function listSagas() {
+  const files = await fs.readdir(sagasDir);
+  const sagas = [];
+  for (const file of files.filter((f) => f.endsWith('.json'))) {
+    const saga = await readSaga(path.basename(file, '.json'));
+    if (saga) {
+      sagas.push({
+        id: saga.id,
+        title: saga.title,
+        subtitle: saga.subtitle,
+        icon: saga.icon,
+        accent: saga.accent,
+        completeMessage: saga.completeMessage,
+        arcCount: saga.arcs.length,
+        actCount: saga.arcs.reduce((n, arc) => n + arc.acts.length, 0),
+        arcNames: saga.arcs.map((arc) => arc.name)
+      });
+    }
+  }
+  return sagas;
+}
+
+async function getSaga(sagaId) {
+  return readSaga(sagaId);
+}
+
+// Flatten all acts from all arcs of one saga
+async function getAllActs(sagaId) {
+  const saga = await readSaga(sagaId);
+  if (!saga) return [];
+  return saga.arcs.flatMap((arc) =>
+    arc.acts.map((act) => ({
+      ...act,
+      sagaId: saga.id,
+      id: `${saga.id}-${act.act}`,
+      arcNumber: arc.arc,
+      arcName: arc.name,
+      arcColor: arc.color
+    }))
   );
 }
 
-async function getAct(actNumber) {
-  const acts = await getAllActs();
-  return acts.find((a) => a.act === actNumber) || null;
+async function getAct(sagaId, actNumber) {
+  const acts = await getAllActs(sagaId);
+  return acts.find((a) => a.act === Number(actNumber)) || null;
 }
 
-async function saveSession(sessionData) {
+async function saveSession(sagaId, sessionData) {
   const db = await readDb();
   const session = {
     _id: crypto.randomUUID(),
+    sagaId,
     ...sessionData,
     createdAt: new Date().toISOString()
   };
@@ -44,4 +86,4 @@ async function saveSession(sessionData) {
   return session;
 }
 
-module.exports = { getSaga, getAllActs, getAct, saveSession };
+module.exports = { listSagas, getSaga, getAllActs, getAct, saveSession };

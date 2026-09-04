@@ -589,6 +589,98 @@ body {
 .success-title { font-size:1.25rem; font-weight:700; margin-bottom:0.4rem; letter-spacing:-0.02em; }
 .success-subtitle { font-size:0.88rem; color:var(--text-muted); max-width:360px; margin:0 auto 1.5rem; }
 
+/* ── SAGA COMPLETE ACTIONS ─────────────────────────────── */
+.saga-actions {
+  display:flex; align-items:center; justify-content:center;
+  gap:0.85rem; flex-wrap:wrap;
+}
+
+/* ── SAGA SELECT ───────────────────────────────────────── */
+.saga-select {
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:3rem 1.5rem;
+  gap:2.5rem;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(108,142,251,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 80%, rgba(52,211,153,0.05) 0%, transparent 60%);
+}
+.saga-select-header { text-align:center; max-width:560px; }
+.ss-kicker {
+  font-size:0.7rem; font-weight:700; letter-spacing:0.2em;
+  text-transform:uppercase; color:var(--accent);
+  margin-bottom:0.75rem;
+}
+.ss-title {
+  font-family:'Cinzel',serif;
+  font-size:2.4rem; font-weight:600;
+  letter-spacing:-0.01em; margin-bottom:0.6rem;
+  background:linear-gradient(135deg,var(--accent),var(--arc4));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.ss-subtitle { font-size:0.92rem; color:var(--text-muted); line-height:1.6; }
+
+.saga-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:1.25rem; width:100%; max-width:760px;
+}
+.saga-card {
+  position:relative;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:2rem 1.75rem;
+  text-align:left;
+  color:var(--text);
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+  overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.35);
+  transition:transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+}
+.saga-card::before {
+  content:'';
+  position:absolute; inset:0;
+  background:linear-gradient(135deg, color-mix(in srgb, var(--saga-accent) 12%, transparent), transparent 55%);
+  pointer-events:none;
+}
+.saga-card:hover {
+  transform:translateY(-3px);
+  border-color:var(--saga-accent, var(--border-hi));
+  box-shadow:0 12px 40px rgba(0,0,0,0.5);
+}
+.saga-card-icon { font-size:2.4rem; margin-bottom:1rem; position:relative; }
+.saga-card-title {
+  font-family:'Cinzel',serif;
+  font-size:1.3rem; font-weight:600;
+  margin-bottom:0.35rem; position:relative;
+}
+.saga-card-sub {
+  font-size:0.88rem; color:var(--text-muted); line-height:1.55;
+  margin-bottom:1.25rem; position:relative;
+}
+.saga-card-meta {
+  display:flex; gap:0.8rem;
+  font-size:0.72rem; color:var(--text-muted);
+  text-transform:uppercase; letter-spacing:0.07em;
+  margin-bottom:1.5rem; position:relative; flex-wrap:wrap;
+}
+.saga-card-meta span {
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  border-radius:99px;
+  padding:0.25rem 0.7rem;
+}
+.saga-card-cta {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  font-size:0.85rem; font-weight:600; color:var(--saga-accent);
+  position:relative;
+}
+.saga-card:hover .saga-card-cta { text-decoration:underline; }
+
 /* ── SAGA COMPLETE ────────────────────────────────────────── */
 .saga-complete {
   display:flex; flex-direction:column; align-items:center;
