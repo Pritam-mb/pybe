@@ -1,3 +1,53 @@
 {
-  "sessions": []
+  "sessions": [],
+  "notes": [
+    {
+      "_id": "641f9377-15e5-4dad-9b42-bb49d4ffc6cc",
+      "sagaId": "inheritance",
+      "act": 1,
+      "actName": "The Pattern",
+      "text": "In Act 1, we discovered how generalization / base class works. Several different things can share the same core traits. When they do, we group them under one shared label. In Python, that label becomes a class, the foundation every member builds on.",
+      "createdAt": "2026-09-08T12:48:59.695Z"
+    },
+    {
+      "_id": "f4087858-f888-4474-91b9-b6ade5843dac",
+      "sagaId": "inheritance",
+      "act": 2,
+      "actName": "The Eagle's Secret",
+      "text": "In Act 2, we discovered how child class / is-a relationship works. A child keeps every trait of the shared group automatically. Then it adds its own special ability on top. In Python, class Eagle(Animal): says “Eagle IS-A Animal”.",
+      "createdAt": "2026-09-08T12:51:24.595Z"
+    },
+    {
+      "_id": "acc8bd23-056f-453c-8add-c31bc2db394a",
+      "sagaId": "inheritance",
+      "act": 1,
+      "actName": "The Pattern",
+      "text": "In Act 1, we discovered how generalization / base class works. Several different things can share the same core traits. When they do, we group them under one shared label. In Python, that label becomes a class, the foundation every member builds on.",
+      "createdAt": "2026-09-08T12:54:11.211Z"
+    },
+    {
+      "_id": "c2c1244f-6101-4ace-9b8c-6268a0adb926",
+      "sagaId": "inheritance",
+      "act": 1,
+      "actName": "The Pattern",
+      "text": "In Act 1, we discovered how generalization / base class works. Several different things can share the same core traits. When they do, we group them under one shared label. In Python, that label becomes a class, the foundation every member builds on.",
+      "createdAt": "2026-09-08T12:55:13.264Z"
+    },
+    {
+      "_id": "171bba26-5d8e-4db2-b1bd-d27e4c8cef07",
+      "sagaId": "polymorphism",
+      "act": 1,
+      "actName": "The Same Request",
+      "text": "In Act 1, we discovered how same action / different behavior works. One request was given to three different objects. Each object responded in its own way. Same action → different behavior.",
+      "createdAt": "2026-09-08T13:02:11.881Z"
+    },
+    {
+      "_id": "16fc7902-1c48-42fb-9be2-502ac732f5b6",
+      "sagaId": "inheritance",
+      "act": 1,
+      "actName": "The Pattern",
+      "text": "In Act 1, we discovered how generalization / base class works. Several different things can share the same core traits. When they do, we group them under one shared label. In Python, that label becomes a class, the foundation every member builds on.",
+      "createdAt": "2026-09-08T13:10:25.028Z"
+    }
+  ]
 }

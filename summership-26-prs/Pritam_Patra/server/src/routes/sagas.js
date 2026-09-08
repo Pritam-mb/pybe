@@ -79,4 +79,28 @@ router.post('/:sagaId/session', async (req, res, next) => {
   }
 });
 
+// GET /api/sagas/:sagaId/notes — all summary notes saved for this saga
+router.get('/:sagaId/notes', async (req, res, next) => {
+  try {
+    const notes = await store.listNotes(req.params.sagaId);
+    res.json(notes);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/sagas/:sagaId/notes — save one act summary note
+router.post('/:sagaId/notes', async (req, res, next) => {
+  try {
+    const { act, actName, text } = req.body;
+    if (!act || !text) {
+      return res.status(400).json({ message: 'act and text are required' });
+    }
+    const note = await store.addNote(req.params.sagaId, { act, actName, text });
+    res.status(201).json(note);
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

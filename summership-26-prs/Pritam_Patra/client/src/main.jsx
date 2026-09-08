@@ -22,7 +22,7 @@ function SagaSelect({ sagas, onSelect }) {
         <h1 className="ss-title">Choose a Case Study</h1>
         <p className="ss-subtitle">
           Each saga is a guided story where you discover a computer-science concept
-          yourself — before anyone tells you its name.
+          yourself before anyone tells you its name.
         </p>
       </div>
       <div className="saga-grid">
@@ -68,145 +68,189 @@ function ChapterCard({ arcLabel, actNumber, actName, concept, onStart }) {
   );
 }
 
-// ── Typewriter Dialogue Box ───────────────────────────────────────────
-function DialogueBox({ speaker, text, avatarStr, onComplete, isLast }) {
-  const [displayedText, setDisplayedText] = useState('');
-  const [isTyping, setIsTyping] = useState(true);
+// ── Character layout config (position on scene + comic bubble direction) ─
+const CHAR_LAYOUT = {
+  narrator: null, // handled separately as top banner
+  priya:   { pos: { top: '42%',  left: '28%'  }, color: '#818cf8', tail: 'tail-left'       },
+  pip:     { pos: { top: '55%',  right: '8%'  }, color: '#fbbf24', tail: 'tail-down-right' },
+  lion:    { pos: { top: '8%',   left: '38%'  }, color: '#fb923c', tail: 'tail-down'       },
+  eagle:   { pos: { top: '8%',   left: '54%'  }, color: '#34d399', tail: 'tail-down'       },
+  dolphin: { pos: { top: '5%',   right: '9%'  }, color: '#22d3ee', tail: 'tail-down'       },
+  chameleon: { pos: { top: '35%', left: '45%' }, color: '#a3e635', tail: 'tail-down'       },
+};
 
-  useEffect(() => {
-    setDisplayedText('');
-    setIsTyping(true);
-    let i = 0;
-    const speed = speaker.name === 'Narrator' ? 22 : 28;
-    const interval = setInterval(() => {
-      setDisplayedText(text.substring(0, i + 1));
-      i++;
-      if (i >= text.length) {
-        clearInterval(interval);
-        setIsTyping(false);
-      }
-    }, speed);
-    return () => clearInterval(interval);
-  }, [text, speaker]);
+// ── Cinematic Dialogue (comic-style bubbles positioned over characters) ─
+function CinematicDialogue({ lines, characters, image, onComplete }) {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => { setIdx(0); }, [lines]);
 
-  function handleAdvance() {
-    if (isTyping) {
-      setDisplayedText(text);
-      setIsTyping(false);
-    } else {
-      onComplete();
-    }
+  const current = lines[idx];
+  const speaker = characters[current.speaker];
+  const isLast  = idx === lines.length - 1;
+  const isNarrator = current.speaker === 'narrator';
+  const layout = CHAR_LAYOUT[current.speaker];
+
+  function advance(e) {
+    e.stopPropagation();
+    if (isLast) onComplete();
+    else setIdx(i => i + 1);
   }
 
-  const isNarrator = speaker.name === 'Narrator';
-  const isPip = speaker.name === 'Pip';
-
-  let avatarClass = 'char-avatar';
-  if (isNarrator) avatarClass += ' narrator';
-  if (isPip) avatarClass += ' pip';
-
-  let nameClass = 'char-name';
-  if (isNarrator) nameClass += ' narrator';
-  if (isPip) nameClass += ' pip';
-
-  let textClass = 'dialogue-text';
-  if (isNarrator) textClass += ' narrator-style';
-
   return (
-    <div className="dialogue-area" onClick={handleAdvance} style={{ cursor: 'pointer' }}>
-      <div className="dialogue-box">
-        <div className={avatarClass}>{avatarStr}</div>
-        <div className="dialogue-content">
-          <div className={nameClass}>{speaker.name}</div>
-          <div className={textClass}>
-            {displayedText}
-            {isTyping && <span className="dialogue-cursor" />}
-          </div>
-          {!isTyping && (
-            <div className="dialogue-advance">
-              <button className="advance-btn">
-                {isLast ? 'Continue' : 'Next'} ▶
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+    <div className="cinematic-scene" onClick={advance}>
+      {image && <img src={image} className="cinematic-bg" alt="" />}
+      <div className="cinematic-scrim" />
 
-// ── Wrong Answer Understanding Window ────────────────────────────────
-function WrongAnswerWindow({ correction, onRetry }) {
-  return (
-    <div className="wrong-answer-window">
-      <div className="waw-header">
-        <span className="waw-owl">🦉</span>
-        <div className="waw-header-text">
-          <div className="waw-title">Let's Think This Through Together</div>
-          <div className="waw-subtitle">Pip the Owl has some thoughts for you...</div>
-        </div>
+      {/* Progress dots */}
+      <div className="cin-progress">
+        {lines.map((_, i) => (
+          <div
+            key={i}
+            className={`cin-dot${i === idx ? ' cin-dot-cur' : i < idx ? ' cin-dot-done' : ''}`}
+          />
+        ))}
       </div>
 
-      {correction.misconception && (
-        <div className="waw-section waw-miss">
-          <div className="waw-section-label">📌 What was missing from your answer:</div>
-          <div className="waw-section-body">{correction.misconception}</div>
+      {/* Narrator: film-strip top caption */}
+      {isNarrator && (
+        <div className="cin-narrator" key={`n-${idx}`}>
+          <span className="cin-narrator-icon">{speaker.avatar}</span>
+          <span className="cin-narrator-text">{current.text}</span>
         </div>
       )}
 
-      <div className="waw-section waw-guide">
-        <div className="waw-section-label">🔍 Try thinking about it this way:</div>
-        <div className="waw-followup-q">{correction.followUpQuestion}</div>
-      </div>
-
-      <div className="waw-footer">
-        <div className="waw-tip">
-          💡 Struggling with this is part of discovering the concept. Take your time — the answer is already in the story.
+      {/* Character: comic speech bubble positioned over their face */}
+      {!isNarrator && layout && (
+        <div
+          className={`cin-comic-bubble ${layout.tail}`}
+          style={{
+            ...layout.pos,
+            '--bcolor': layout.color,
+            borderColor: layout.color,
+          }}
+          key={`b-${idx}`}
+        >
+          <div className="cin-comic-name" style={{ color: layout.color }}>
+            {speaker.avatar} {speaker.name}
+          </div>
+          <div className="cin-comic-text">{current.text}</div>
         </div>
-        <button className="btn-submit" onClick={onRetry}>
-          ↩ Try Again
-        </button>
+      )}
+
+      {/* Advance hint */}
+      <div className="cin-advance">
+        {isLast ? 'Continue ▶' : 'Tap anywhere to advance'}
       </div>
     </div>
   );
 }
 
-// ── Reasoning Capture (after correct observation) ─────────────────────
-function ReasoningCapture({ onSubmit }) {
-  const [text, setText] = useState('');
+
+// ── Shared multiple-choice option list ───────────────────────────────
+function OptionList({ options, selected, correctIdx, status, onPick, disabled }) {
+  return (
+    <div className="mcq-options">
+      {options.map((opt, i) => {
+        let cls = 'mcq-option';
+        if (selected === i) {
+          cls += status === 'correct' ? ' correct' : status === 'wrong' ? ' wrong' : '';
+        } else if (status === 'correct' && i === correctIdx) {
+          cls += ' correct';
+        }
+        return (
+          <button key={i} className={cls} onClick={() => onPick(i)} disabled={disabled || (selected != null && status === 'correct')}>
+            {opt}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Copy to clipboard button ─────────────────────────────────────────
+function CopyBtn({ text, label = 'Copy' }) {
+  const [ok, setOk] = useState(false);
 
   return (
-    <div className="reasoning-window">
-      <div className="reasoning-header">
-        <span className="reasoning-star">✨</span>
-        <div>
-          <div className="reasoning-title">Excellent Observation!</div>
-          <div className="reasoning-sub">You got it. But before we move on...</div>
-        </div>
-      </div>
+    <button
+      className={`copy-btn ${ok ? 'copied' : ''}`}
+      onClick={async (e) => {
+        e.stopPropagation();
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        setOk(true);
+        setTimeout(() => setOk(false), 1500);
+      }}
+    >
+      {ok ? 'Copied ✓' : `📋 ${label}`}
+    </button>
+  );
+}
 
-      <div className="reasoning-body">
-        <div className="reasoning-question">
-          How did you figure that out?
+// ── Transfer Scenario (apply the pattern to a new situation) ─────────
+function TransferScenario({ scenario, onContinue }) {
+  const [selected, setSelected] = useState(null);
+  const [status, setStatus] = useState(null);
+
+  function handlePick(idx) {
+    if (status === 'correct') return;
+    setSelected(idx);
+    if (idx === scenario.answerIndex) {
+      setStatus('correct');
+    } else {
+      setStatus('wrong');
+    }
+  }
+
+  return (
+    <div className="fullscreen-overlay">
+      <div className="fullpage">
+        <div className="fullpage-head">
+          <span className="fp-icon">🔀</span>
+          <div>
+            <div className="fp-title">Now Try a Different Scenario</div>
+            <div className="fp-sub">Can you spot the same pattern in a brand new situation?</div>
+          </div>
         </div>
-        <div className="reasoning-hint">
-          Describe the thinking process you used — what clues did you look for? What did you compare?
-          This helps you build a <strong>reasoning pattern</strong> you can apply to any new problem.
+
+        <div className="fullpage-body">
+          <div className="transfer-card">
+            <div className="transfer-scenario-title">{scenario.title}</div>
+            <div className="transfer-scenario-text">{scenario.text}</div>
+          </div>
+
+          <div className="fp-question">{scenario.question}</div>
+
+          <OptionList
+            options={scenario.options}
+            selected={selected}
+            correctIdx={scenario.answerIndex}
+            status={status}
+            onPick={handlePick}
+          />
+
+          {status === 'wrong' && scenario.hint && (
+            <div className="owl-correction" style={{ marginTop: '1.1rem' }}>
+              <div className="owl-avatar">🦉</div>
+              <div className="owl-body">
+                <div className="owl-name">Pip the Owl</div>
+                <div className="owl-misconception">Not quite, look at the options again.</div>
+                <div className="owl-question">{scenario.hint}</div>
+              </div>
+            </div>
+          )}
         </div>
-        <textarea
-          className="obs-textarea"
-          style={{ minHeight: '90px' }}
-          placeholder="I noticed that... / I figured it out by comparing... / My approach was..."
-          value={text}
-          onChange={e => setText(e.target.value)}
-          autoFocus
-        />
-        <div className="reasoning-actions">
-          <button
-            className="btn-submit"
-            onClick={() => onSubmit(text)}
-            disabled={!text.trim()}
-          >
+
+        <div className="fullpage-actions">
+          <button className="btn-submit" onClick={onContinue} disabled={status !== 'correct'}>
             Continue →
           </button>
         </div>
@@ -215,29 +259,132 @@ function ReasoningCapture({ onSubmit }) {
   );
 }
 
-// ── Story Bridge Phase (after MCQ, before slides) ────────────────────
-// Reuses DialogueBox — feels like the story is still going
-function StoryBridgePhase({ storyBridge, saga, onComplete }) {
-  const [idx, setIdx] = useState(0);
-
-  const current = storyBridge[idx];
-  const speaker = saga.characters[current.speaker];
-
-  const handleNext = () => {
-    if (idx < storyBridge.length - 1) {
-      setIdx(i => i + 1);
-    } else {
-      onComplete();
-    }
-  };
+// ── Summary / Notes Capture (after MCQ, before slides) ───────────────
+function SummaryPanel({ act, onSave }) {
+  const summaryText = [
+    `In Act ${act.act}, we discovered how ${act.concept.toLowerCase()} works.`,
+    ...(act.summaryGuide || [])
+  ].join(' ');
 
   return (
-    <DialogueBox
-      speaker={speaker}
-      text={current.text}
-      avatarStr={speaker.avatar}
-      isLast={idx === storyBridge.length - 1}
-      onComplete={handleNext}
+    <div className="fullscreen-overlay">
+      <div className="fullpage">
+        <div className="fullpage-head">
+          <span className="fp-icon">🎉</span>
+          <div>
+            <div className="fp-title">Well done! You understood right!</div>
+            <div className="fp-sub">Now let's take the summary of what we have learned from here.</div>
+          </div>
+        </div>
+
+        <div className="fullpage-body">
+          <div className="summary-guide">
+            <div className="summary-guide-label">🔖 Summary of what we learned in Act {act.act}</div>
+            <div className="summary-paragraph">{summaryText}</div>
+            <div className="summary-key-points">
+              {(act.summaryGuide || []).map((point, i) => (
+                <div className="summary-guide-point" key={i}>
+                  <span className="cdp-bullet">→</span>
+                  <span>{point}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="summary-note-hint">
+            📌 This summary is saved automatically to your Notes in the Field Journal.
+          </div>
+        </div>
+
+        <div className="fullpage-actions">
+          <button className="btn-submit" onClick={() => onSave(summaryText)}>
+            Continue →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Now You Write the Code (free-form practice after fill-in-the-blank) ─
+function CodeWrite({ codeTask, onDone, onSkip }) {
+  const [code, setCode] = useState('');
+  const [status, setStatus] = useState(null);
+
+  function handleCheck() {
+    const missing = (codeTask.acceptableSubstrings || []).filter(s => !code.includes(s));
+    if (!missing.length) setStatus('correct');
+    else setStatus({ missing });
+  }
+
+  return (
+    <div className="fullscreen-overlay">
+      <div className="fullpage">
+        <div className="fullpage-head">
+          <span className="fp-icon">✍️</span>
+          <div>
+            <div className="fp-title">{codeTask.title}</div>
+            <div className="fp-sub">The best way to learn is to write it yourself.</div>
+          </div>
+        </div>
+
+        <div className="fullpage-body">
+          <div className="code-write">
+            <div className="cw-instructions">{codeTask.instructions}</div>
+
+            <div className="code-window">
+              <div className="code-titlebar">
+                <div className="cdot r" /><div className="cdot a" /><div className="cdot g" />
+                <span className="code-filename">my_solution.py</span>
+                <span className="cdp-badge" style={{ marginLeft: 'auto' }}>your code</span>
+                <CopyBtn text={code} label="Copy code" />
+              </div>
+              <textarea
+                className="cw-editor"
+                spellCheck={false}
+                placeholder="# Write your Python code from scratch here..."
+                value={code}
+                onChange={e => { setCode(e.target.value); setStatus(null); }}
+                autoFocus
+              />
+            </div>
+
+            {status === 'correct' && (
+              <div className="code-explanation">
+                <strong>✅ Brilliant!</strong> You wrote the pattern yourself, now you've really got it.
+              </div>
+            )}
+            {status && status !== 'correct' && (
+              <div className="cw-missing">
+                Almost there, check that your code includes: {status.missing.join(', ')}. Compare with the slides you just saw.
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="fullpage-actions split">
+          <button className="slide-back-btn" onClick={onSkip}>I'll practice later →</button>
+          {status === 'correct' ? (
+            <button className="btn-submit" onClick={onDone}>Continue Saga ▶</button>
+          ) : (
+            <button className="btn-submit" onClick={handleCheck} disabled={!code.trim()}>
+              Check My Code 🔍
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Story Bridge Phase (after MCQ, before slides) ────────────────────
+function StoryBridgePhase({ storyBridge, saga, image, onComplete }) {
+  return (
+    <CinematicDialogue
+      lines={storyBridge}
+      characters={saga.characters}
+      image={image}
+      onComplete={onComplete}
     />
   );
 }
@@ -255,86 +402,107 @@ function SlideTeacher({ slides, filename, onComplete }) {
     highlights.some(word => line.includes(word));
 
   return (
-    <div className="slide-teacher">
-      {/* ── Step indicator ── */}
-      <div className="slide-header">
-        <div className="slide-step-pill">
-          Step {slideIdx + 1} of {slides.length}
+    <div className="fullscreen-overlay">
+      <div className="fullpage">
+        <div className="fullpage-head">
+          <span className="fp-icon">💻</span>
+          <div>
+            <div className="fp-title">Learn the Code</div>
+            <div className="fp-sub">Reading through how Python writes this, one step at a time.</div>
+          </div>
         </div>
-        <div className="slide-title">{slide.slideTitle}</div>
-      </div>
 
-      {/* ── Story connection quote ── */}
-      <div className="slide-story-quote">
-        <span className="slide-quote-icon">💬</span>
-        <span className="slide-quote-text">{slide.storyConnection}</span>
-      </div>
-
-      {/* ── Code window ── */}
-      <div className="code-window slide-code-window">
-        <div className="code-titlebar">
-          <div className="cdot r" /><div className="cdot a" /><div className="cdot g" />
-          <span className="code-filename">{filename}</span>
-          <span className="cdp-badge" style={{ marginLeft: 'auto' }}>read only</span>
-        </div>
-        <div className="code-body">
-          {lines.map((line, i) => (
-            <div
-              key={i}
-              className={`code-line ${isHighlightedLine(line) ? 'st-highlight-line' : ''}`}
-            >
-              {line || '\u00a0'}
+        <div className="fullpage-body">
+          <div className="slide-teacher">
+            {/* ── Step indicator ── */}
+            <div className="slide-header">
+              <div className="slide-step-pill">
+                Step {slideIdx + 1} of {slides.length}
+              </div>
+              <div className="slide-title">{slide.slideTitle}</div>
             </div>
-          ))}
+
+            {/* ── Story connection quote ── */}
+            <div className="slide-story-quote">
+              <span className="slide-quote-icon">💬</span>
+              <span className="slide-quote-text">{slide.storyConnection}</span>
+            </div>
+
+            {/* ── Code window ── */}
+            <div className="code-window slide-code-window">
+              <div className="code-titlebar">
+                <div className="cdot r" /><div className="cdot a" /><div className="cdot g" />
+                <span className="code-filename">{filename}</span>
+                <span className="cdp-badge" style={{ marginLeft: 'auto' }}>read only</span>
+                <CopyBtn text={slide.code} label="Copy code" />
+              </div>
+              <div className="code-body">
+                {lines.map((line, i) => (
+                  <div
+                    key={i}
+                    className={`code-line ${isHighlightedLine(line) ? 'st-highlight-line' : ''}`}
+                  >
+                    {line || '\u00a0'}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Explanation ── */}
+            <div className="slide-explanation">
+              <span className="cdp-exp-icon">💡</span>
+              <span>{slide.explanation}</span>
+            </div>
+
+            {/* ── Navigation ── */}
+            <div className="slide-nav">
+              {slideIdx > 0 && (
+                <button
+                  className="slide-back-btn"
+                  onClick={() => setSlideIdx(i => i - 1)}
+                >
+                  ← Previous
+                </button>
+              )}
+              {!isLast ? (
+                <button
+                  className="chapter-btn"
+                  onClick={() => setSlideIdx(i => i + 1)}
+                >
+                  Next Step →
+                </button>
+              ) : (
+                <button className="chapter-btn" onClick={onComplete}>
+                  ✏️ Now Write It Yourself!
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* ── Explanation ── */}
-      <div className="slide-explanation">
-        <span className="cdp-exp-icon">💡</span>
-        <span>{slide.explanation}</span>
-      </div>
-
-      {/* ── Navigation ── */}
-      <div className="slide-nav">
-        {slideIdx > 0 && (
-          <button
-            className="slide-back-btn"
-            onClick={() => setSlideIdx(i => i - 1)}
-          >
-            ← Previous
-          </button>
-        )}
-        {!isLast ? (
-          <button
-            className="chapter-btn"
-            onClick={() => setSlideIdx(i => i + 1)}
-          >
-            Next Step →
-          </button>
-        ) : (
-          <button className="chapter-btn" onClick={onComplete}>
-            ✏️ Now Write It Yourself!
-          </button>
-        )}
       </div>
     </div>
   );
 }
 
-// ── Observation Input ────────────────────────────────────────────────
-function ObservationInput({ prompt, questions, onSubmit, loading }) {
-  const [answer, setAnswer] = useState('');
+// ── Observation Input (multiple choice) ──────────────────────────────
+function ObservationInput({ prompt, obs, onSubmit }) {
+  const [selected, setSelected] = useState(null);
+  const [status, setStatus] = useState(null);
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (!answer.trim() || loading) return;
-    onSubmit(answer);
-    setAnswer('');
+  function handlePick(idx) {
+    if (status === 'correct') return;
+    setSelected(idx);
+    if (idx === obs.answerIndex) {
+      setStatus('correct');
+      setTimeout(() => onSubmit(true), 900);
+    } else {
+      setStatus('wrong');
+    }
   }
 
   return (
     <div className="observation-panel">
+      <div className="observation-header">Observation</div>
       {prompt && (
         <div className="priya-prompt">
           <span style={{ fontSize: '1.2rem' }}>📝</span>
@@ -342,92 +510,102 @@ function ObservationInput({ prompt, questions, onSubmit, loading }) {
         </div>
       )}
 
-      <div className="question-chips">
-        {questions.map((q, i) => (
-          <div className="question-chip" key={i}>
-            <span className="q-num">{i + 1}</span>
-            <span>{q}</span>
-          </div>
-        ))}
-      </div>
+      <div className="obs-question">{obs.question}</div>
 
-      <form onSubmit={handleSubmit}>
-        <textarea
-          className="obs-textarea"
-          placeholder="Type your observation..."
-          value={answer}
-          onChange={e => setAnswer(e.target.value)}
-          disabled={loading}
-        />
-        <div className="obs-actions">
-          <button className="btn-submit" type="submit" disabled={!answer.trim() || loading}>
-            {loading ? <><div className="spin" /> Evaluating...</> : 'Record in Journal'}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
+      <OptionList
+        options={obs.options}
+        selected={selected}
+        correctIdx={obs.answerIndex}
+        status={status}
+        onPick={handlePick}
+      />
 
-// ── Pip Retry Reminder (shows above obs input on retry) ──────────────
-function OwlRetryReminder({ question }) {
-  return (
-    <div className="owl-correction">
-      <div className="owl-avatar">🦉</div>
-      <div className="owl-body">
-        <div className="owl-name">Pip's Guiding Question</div>
-        <div className="owl-question">{question}</div>
-      </div>
-    </div>
-  );
-}
-
-// ── MCQ Panel ─────────────────────────────────────────────────────────
-function McqPanel({ mcq, onCorrect }) {
-  const [selectedIdx, setSelectedIdx] = useState(null);
-  const [status, setStatus] = useState(null);
-  const [showHint, setShowHint] = useState(false);
-
-  function handleSelect(idx) {
-    if (status === 'correct') return;
-    setSelectedIdx(idx);
-    if (idx === mcq.answerIndex) {
-      setStatus('correct');
-      setTimeout(onCorrect, 1500);
-    } else {
-      setStatus('wrong');
-      setShowHint(true);
-    }
-  }
-
-  return (
-    <div className="mcq-panel">
-      <div className="mcq-question">{mcq.question}</div>
-      <div className="mcq-options">
-        {mcq.options.map((opt, i) => {
-          let cls = 'mcq-option';
-          if (selectedIdx === i) {
-            cls += status === 'correct' ? ' correct' : status === 'wrong' ? ' wrong' : '';
-          } else if (status === 'correct' && i === mcq.answerIndex) {
-            cls += ' correct';
-          }
-          return (
-            <button key={i} className={cls} onClick={() => handleSelect(i)} disabled={status === 'correct'}>
-              {opt}
-            </button>
-          );
-        })}
-      </div>
-      {showHint && status === 'wrong' && (
+      {status === 'wrong' && obs.hint && (
         <div className="owl-correction" style={{ marginTop: '1rem' }}>
           <div className="owl-avatar">🦉</div>
           <div className="owl-body">
             <div className="owl-name">Pip the Owl</div>
-            <div className="owl-misconception">Not quite — look at the options again.</div>
-            <div className="owl-question">{mcq.hint}</div>
+            <div className="owl-misconception">Not quite, try another option.</div>
+            <div className="owl-question">{obs.hint}</div>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── MCQ Panel (all 3 questions on one full page) ─────────────────────
+function McqPanel({ mcqs, onCorrect }) {
+  const [qState, setQState] = useState(() => mcqs.map(() => ({ picked: null, status: null })));
+
+  const correctCount = qState.filter(s => s.status === 'correct').length;
+  const allCorrect = correctCount === mcqs.length;
+
+  function handlePick(qi, pick) {
+    if (qState[qi].status === 'correct') return;
+    setQState(prev => {
+      const next = prev.map(s => ({ ...s }));
+      next[qi] = {
+        picked: pick,
+        status: pick === mcqs[qi].answerIndex ? 'correct' : 'wrong'
+      };
+      return next;
+    });
+  }
+
+  return (
+    <div className="fullscreen-overlay">
+      <div className="fullpage">
+        <div className="fullpage-head">
+          <span className="fp-icon">❓</span>
+          <div>
+            <div className="fp-title">Quick Check</div>
+            <div className="fp-sub">Three questions on one page. Answer all of them to continue.</div>
+          </div>
+          <div className={`fp-progress ${allCorrect ? 'done' : ''}`}>
+            {correctCount} of {mcqs.length} correct
+          </div>
+        </div>
+
+        <div className="fullpage-body">
+          {mcqs.map((mcq, qi) => {
+            const s = qState[qi];
+            return (
+              <div className="mcq-block" key={qi}>
+                <div className="mcq-block-head">
+                  <span className="mcq-block-num">Q{qi + 1}</span>
+                  <div className="mcq-question">{mcq.question}</div>
+                </div>
+
+                <OptionList
+                  options={mcq.options}
+                  selected={s.picked}
+                  correctIdx={mcq.answerIndex}
+                  status={s.status}
+                  onPick={i => handlePick(qi, i)}
+                />
+
+                {s.status === 'wrong' && mcq.hint && (
+                  <div className="owl-correction" style={{ marginTop: '0.9rem' }}>
+                    <div className="owl-avatar">🦉</div>
+                    <div className="owl-body">
+                      <div className="owl-name">Pip the Owl</div>
+                      <div className="owl-misconception">Not quite, look at the options again.</div>
+                      <div className="owl-question">{mcq.hint}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="fullpage-actions">
+          <button className="btn-submit" onClick={onCorrect} disabled={!allCorrect}>
+            {allCorrect ? 'Continue →' : `Answer all of them first (${correctCount}/${mcqs.length})`}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -440,6 +618,7 @@ function CodeSolve({ codeReveal, onSolve }) {
   const [attempts, setAttempts] = useState(0);
 
   const blankDef = codeReveal.blanks[0];
+  const copyCode = codeReveal.template.replaceAll('____', blankDef.answer);
 
   function handleCheck() {
     if (blankValue.trim() === blankDef.answer) {
@@ -455,74 +634,88 @@ function CodeSolve({ codeReveal, onSolve }) {
   const lines = codeReveal.template.split('\n');
 
   return (
-    <div className="code-solve">
-      <div className="code-intro">
-        You've seen how Python writes this. Now fill in the missing piece <strong>yourself</strong>.
-      </div>
-
-      <div className="code-window">
-        <div className="code-titlebar">
-          <div className="cdot r" /><div className="cdot a" /><div className="cdot g" />
-          <span className="code-filename">{codeReveal.file}</span>
-          <span className="cdp-badge" style={{ marginLeft: 'auto' }}>editable</span>
+    <div className="fullscreen-overlay">
+      <div className="fullpage">
+        <div className="fullpage-head">
+          <span className="fp-icon">🧩</span>
+          <div>
+            <div className="fp-title">Fill in the Blank</div>
+            <div className="fp-sub">You've seen how Python writes this. Now fill in the missing piece yourself.</div>
+          </div>
         </div>
-        <div className="code-body">
-          {lines.map((line, i) => {
-            if (line.includes('____')) {
-              const parts = line.split('____');
-              return (
-                <div key={i} className="code-line">
-                  {parts[0]}
-                  <input
-                    className={`blank-input ${status || ''}`}
-                    value={blankValue}
-                    onChange={e => { setBlankValue(e.target.value); setStatus(null); }}
-                    placeholder={blankDef.placeholder}
-                    spellCheck={false}
-                    autoFocus
-                  />
-                  {parts[1]}
-                </div>
-              );
-            }
-            return <div key={i} className="code-line">{line || '\u00a0'}</div>;
-          })}
-        </div>
-      </div>
 
-      {status === 'wrong' && (
-        <div style={{ color: 'var(--red)', fontSize: '0.85rem', marginBottom: '0.85rem' }}>
-          ❌ Not quite — think back to the concept doc you just read.
-        </div>
-      )}
+        <div className="fullpage-body">
+          <div className="code-solve">
+            <div className="code-window">
+              <div className="code-titlebar">
+                <div className="cdot r" /><div className="cdot a" /><div className="cdot g" />
+                <span className="code-filename">{codeReveal.file}</span>
+                <span className="cdp-badge" style={{ marginLeft: 'auto' }}>editable</span>
+                <CopyBtn text={copyCode} label="Copy full code" />
+              </div>
+              <div className="code-body">
+                {lines.map((line, i) => {
+                  if (line.includes('____')) {
+                    const parts = line.split('____');
+                    return (
+                      <div key={i} className="code-line">
+                        {parts[0]}
+                        <input
+                          className={`blank-input ${status || ''}`}
+                          value={blankValue}
+                          onChange={e => { setBlankValue(e.target.value); setStatus(null); }}
+                          placeholder={blankDef.placeholder}
+                          spellCheck={false}
+                          autoFocus
+                        />
+                        {parts[1]}
+                      </div>
+                    );
+                  }
+                  return <div key={i} className="code-line">{line || '\u00a0'}</div>;
+                })}
+              </div>
+            </div>
 
-      {status === 'correct' && (
-        <div className="code-explanation">
-          <strong>✅ Correct!</strong> {codeReveal.explanation}
-        </div>
-      )}
+            {status === 'wrong' && (
+              <div style={{ color: 'var(--red)', fontSize: '0.85rem', marginBottom: '0.85rem' }}>
+                ❌ Not quite, think back to the concept doc you just read.
+              </div>
+            )}
 
-      {status !== 'correct' && (
-        <>
-          {attempts >= 1 && !showHint && (
-            <div className="hint-pill" onClick={() => setShowHint(true)}>💡 Need a hint?</div>
-          )}
-          {showHint && (
-            <div className="hint-text">💡 <strong>Hint:</strong> {blankDef.hint}</div>
-          )}
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            {status === 'correct' && (
+              <div className="code-explanation">
+                <strong>✅ Correct!</strong> {codeReveal.explanation}
+              </div>
+            )}
+
+            {status !== 'correct' && (
+              <>
+                {attempts >= 1 && !showHint && (
+                  <div className="hint-pill" onClick={() => setShowHint(true)}>💡 Need a hint?</div>
+                )}
+                {showHint && (
+                  <div className="hint-text">💡 <strong>Hint:</strong> {blankDef.hint}</div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {status !== 'correct' && (
+          <div className="fullpage-actions">
             <button className="btn-submit" onClick={handleCheck} disabled={!blankValue.trim()}>
               Run Code ▶
             </button>
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 }
 
 // ── Field Journal Sidebar ────────────────────────────────────────────
-function FieldJournal({ saga, currentActNumber, completedActs, xp }) {
+function FieldJournal({ saga, currentActNumber, completedActs, xp, notes }) {
   if (!saga) return <div className="field-journal" />;
 
   return (
@@ -537,7 +730,7 @@ function FieldJournal({ saga, currentActNumber, completedActs, xp }) {
         {saga.arcs.map(arc => (
           <div className="arc-group" key={arc.arc}>
             <div className="arc-label">
-              Arc {arc.arc} — {arc.name}
+              Arc {arc.arc} · {arc.name}
               <div className="arc-bar" />
             </div>
             {arc.acts.map(act => {
@@ -562,6 +755,21 @@ function FieldJournal({ saga, currentActNumber, completedActs, xp }) {
             })}
           </div>
         ))}
+
+        {notes.length > 0 && (
+          <div className="arc-group">
+            <div className="arc-label">
+              📝 My Notes
+              <div className="arc-bar" />
+            </div>
+            {notes.map(note => (
+              <div className="note-entry" key={note._id || `${note.act}-${note.text}`}>
+                <div className="note-head">Act {note.act} · {note.actName}</div>
+                <div className="note-text">{note.text}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -575,22 +783,21 @@ function App() {
   const [allActs, setAllActs] = useState([]);
 
   // State Machine
-  // Modes: 'intro' → 'narrating' → 'observation' → 'evaluating'
-  //        → 'wrong-answer' (show why) → 'observation' (retry)
-  //        → 'reasoning' (how did you solve it?) → 'mcq'
-  //        → 'story-bridge' (Priya/Pip connect story to Python) ← NEW
-  //        → 'slide-teach' (step-by-step code slides) ← NEW
-  //        → 'code' → 'success'
+  // Modes: 'intro' → 'narrating' → 'observation' (multiple choice, inline)
+  //        → 'transfer' (new scenario, full screen, multiple choice)
+  //        → 'mcq' (3 questions, full screen) → 'summary' (auto note)
+  //        → 'story-bridge' (Priya/Pip connect story to Python)
+  //        → 'slide-teach' (step-by-step code slides)
+  //        → 'code' → 'code-write' (now try: write the code yourself)
+  //        → 'success'
   const [actIndex, setActIndex] = useState(0);
   const [mode, setMode] = useState('intro');
   const [bridgeIdx, setBridgeIdx] = useState(0);
 
-  const [dialogueIndex, setDialogueIndex] = useState(0);
-  const [correction, setCorrection] = useState(null);
-  const [retryQuestion, setRetryQuestion] = useState(null);
 
   const [completedActs, setCompletedActs] = useState([]);
   const [xp, setXp] = useState(0);
+  const [notes, setNotes] = useState([]);
 
   useEffect(() => {
     apiFetch('/sagas').then(setSagas).catch(console.error);
@@ -600,11 +807,9 @@ function App() {
     setActIndex(0);
     setMode('intro');
     setBridgeIdx(0);
-    setDialogueIndex(0);
-    setCorrection(null);
-    setRetryQuestion(null);
     setCompletedActs([]);
     setXp(0);
+    setNotes([]);
   };
 
   const handleSelectSaga = (id) => {
@@ -614,10 +819,12 @@ function App() {
     resetGameState();
     Promise.all([
       apiFetch(`/sagas/${id}`),
-      apiFetch(`/sagas/${id}/acts`)
-    ]).then(([s, acts]) => {
+      apiFetch(`/sagas/${id}/acts`),
+      apiFetch(`/sagas/${id}/notes`)
+    ]).then(([s, acts, savedNotes]) => {
       setSaga(s);
       setAllActs(acts.sort((a, b) => a.act - b.act));
+      setNotes(savedNotes || []);
     }).catch(console.error);
   };
 
@@ -660,7 +867,7 @@ function App() {
             </div>
           </div>
         </div>
-        <FieldJournal saga={saga} currentActNumber={999} completedActs={completedActs} xp={xp} />
+        <FieldJournal saga={saga} currentActNumber={999} completedActs={completedActs} xp={xp} notes={notes} />
       </div>
     );
   }
@@ -670,46 +877,18 @@ function App() {
   // ── Actions ──
 
   const handleDialogueComplete = () => {
-    if (dialogueIndex < currentAct.narrative.length - 1) {
-      setDialogueIndex(i => i + 1);
-    } else {
-      setRetryQuestion(null);
-      setMode(currentAct.observationPrompt ? 'observation' : 'mcq');
+    setMode(currentAct.observationPrompt ? 'observation' : 'mcq');
+  };
+
+  const handleObservationSubmit = (correct) => {
+    if (correct) {
+      setMode(currentAct.transferScenario ? 'transfer' : 'mcq');
     }
   };
 
-  const handleObservationSubmit = async (answer) => {
-    setMode('evaluating');
-    setCorrection(null);
-    try {
-      const result = await apiFetch(`/sagas/${saga.id}/evaluate`, {
-        method: 'POST',
-        body: JSON.stringify({ actNumber: currentAct.act, userAnswer: answer })
-      });
-      if (result.understood) {
-        setCorrection(null);
-        setRetryQuestion(null);
-        setMode('reasoning'); // Step: ask HOW they solved it
-      } else {
-        setCorrection(result);
-        setMode('wrong-answer'); // Step: show understanding window
-      }
-    } catch (err) {
-      console.error(err);
-      setMode('observation');
-    }
-  };
-
-  // From wrong-answer window → retry observation with follow-up question
-  const handleWrongAnswerRetry = () => {
-    setRetryQuestion(correction.followUpQuestion);
-    setCorrection(null);
-    setMode('observation');
-  };
-
-  // After reasoning is submitted → proceed to MCQ or next phase
-  const handleReasoningSubmit = (_reasoning) => {
-    if (currentAct.mcq) {
+  // After the transfer scenario is answered correctly → proceed to MCQ or next phase
+  const handleTransferSubmit = () => {
+    if (currentAct.mcqs?.length) {
       setMode('mcq');
     } else if (currentAct.storyBridge?.length) {
       setBridgeIdx(0);
@@ -723,8 +902,35 @@ function App() {
     }
   };
 
-  // After MCQ correct → story bridge (if exists) → slides → code
   const handleMcqCorrect = () => {
+    if (currentAct.summaryGuide?.length) {
+      setMode('summary');
+    } else if (currentAct.storyBridge?.length) {
+      setBridgeIdx(0);
+      setMode('story-bridge');
+    } else if (currentAct.syntaxLesson?.length) {
+      setMode('slide-teach');
+    } else if (currentAct.codeReveal) {
+      setMode('code');
+    } else {
+      handleSuccessState();
+    }
+  };
+
+  const handleSummarySave = async (summaryText) => {
+    const note = { act: currentAct.act, actName: currentAct.name, text: summaryText };
+    setNotes(prev => {
+      const without = prev.filter(n => n.act !== currentAct.act);
+      return [...without, note];
+    });
+    try {
+      await apiFetch(`/sagas/${saga.id}/notes`, {
+        method: 'POST',
+        body: JSON.stringify(note)
+      });
+    } catch (err) {
+      console.error('Failed to save note:', err);
+    }
     if (currentAct.storyBridge?.length) {
       setBridgeIdx(0);
       setMode('story-bridge');
@@ -751,7 +957,15 @@ function App() {
     }
   };
 
-  const handleCodeSolve = () => handleSuccessState();
+  const handleCodeSolve = () => {
+    if (currentAct.codeTask) {
+      setMode('code-write');
+    } else {
+      handleSuccessState();
+    }
+  };
+
+  const handleCodeWriteDone = () => handleSuccessState();
 
   const handleSuccessState = () => {
     setXp(prev => prev + 100);
@@ -761,24 +975,15 @@ function App() {
   const handleNextAct = () => {
     setCompletedActs(prev => [...prev, currentAct.act]);
     setActIndex(i => i + 1);
-    setDialogueIndex(0);
-    setCorrection(null);
-    setRetryQuestion(null);
     setBridgeIdx(0);
     setMode('intro');
   };
-
-  const currentDialogue = currentAct.narrative[dialogueIndex];
-  const speaker = currentDialogue ? saga.characters[currentDialogue.speaker] : null;
-
-  // On retry, replace original questions with follow-up question
-  const displayQuestions = retryQuestion ? [retryQuestion] : currentAct.questions;
 
   return (
     <div className="app">
       {mode === 'intro' && (
         <ChapterCard
-          arcLabel={`Arc ${arcInfo.arc} — ${arcInfo.name}`}
+          arcLabel={`Arc ${arcInfo.arc} · ${arcInfo.name}`}
           actNumber={currentAct.act}
           actName={currentAct.name}
           concept={currentAct.concept}
@@ -798,43 +1003,61 @@ function App() {
 
       <div className="story-area">
         <div className="scene">
-          {currentAct.image && (
+          {/* ── CINEMATIC NARRATING: story on the image ── */}
+          {mode === 'narrating' && (
+            <CinematicDialogue
+              lines={currentAct.narrative}
+              characters={saga.characters}
+              image={currentAct.image}
+              onComplete={handleDialogueComplete}
+            />
+          )}
+
+          {/* ── CINEMATIC STORY BRIDGE: Priya/Pip → Python ── */}
+          {mode === 'story-bridge' && currentAct.storyBridge?.length && (
+            <CinematicDialogue
+              lines={currentAct.storyBridge}
+              characters={saga.characters}
+              image={currentAct.image}
+              onComplete={handleStoryBridgeDone}
+            />
+          )}
+
+          {/* Scene background for non-cinematic modes */}
+          {mode !== 'narrating' && mode !== 'story-bridge' && currentAct.image && (
             <img src={currentAct.image} alt={currentAct.name} className="scene-bg" />
           )}
 
-          {/* ── WRONG ANSWER: Full understanding panel ── */}
-          {mode === 'wrong-answer' && correction && (
-            <WrongAnswerWindow
-              correction={correction}
-              onRetry={handleWrongAnswerRetry}
-            />
-          )}
-
-          {/* ── OBSERVATION RETRY: Pip's guiding question reminder ── */}
-          {(mode === 'observation' || mode === 'evaluating') && retryQuestion && (
-            <OwlRetryReminder question={retryQuestion} />
-          )}
-
-          {/* ── REASONING CAPTURE ── */}
-          {mode === 'reasoning' && (
-            <ReasoningCapture onSubmit={handleReasoningSubmit} />
-          )}
-
-          {/* ── OBSERVATION INPUT ── */}
-          {(mode === 'observation' || mode === 'evaluating') && (
+          {/* ── OBSERVATION INPUT (multiple choice, inline) ── */}
+          {mode === 'observation' && currentAct.observationOptions && (
             <ObservationInput
               prompt={currentAct.observationPrompt}
-              questions={displayQuestions}
+              obs={currentAct.observationOptions}
               onSubmit={handleObservationSubmit}
-              loading={mode === 'evaluating'}
             />
           )}
 
-          {/* ── MCQ ── */}
-          {mode === 'mcq' && currentAct.mcq && (
+          {/* ── TRANSFER SCENARIO (full screen) ── */}
+          {mode === 'transfer' && currentAct.transferScenario && (
+            <TransferScenario
+              scenario={currentAct.transferScenario}
+              onContinue={handleTransferSubmit}
+            />
+          )}
+
+          {/* ── MCQ (3 questions, full screen) ── */}
+          {mode === 'mcq' && currentAct.mcqs?.length && (
             <McqPanel
-              mcq={currentAct.mcq}
+              mcqs={currentAct.mcqs}
               onCorrect={handleMcqCorrect}
+            />
+          )}
+
+          {/* ── SUMMARY ── */}
+          {mode === 'summary' && currentAct.summaryGuide && (
+            <SummaryPanel
+              act={currentAct}
+              onSave={handleSummarySave}
             />
           )}
 
@@ -855,6 +1078,15 @@ function App() {
             />
           )}
 
+          {/* ── NOW YOU WRITE THE CODE ── */}
+          {mode === 'code-write' && currentAct.codeTask && (
+            <CodeWrite
+              codeTask={currentAct.codeTask}
+              onDone={handleCodeWriteDone}
+              onSkip={handleCodeWriteDone}
+            />
+          )}
+
           {/* ── SUCCESS ── */}
           {mode === 'success' && (
             <div className="act-success">
@@ -868,26 +1100,6 @@ function App() {
             </div>
           )}
         </div>
-
-        {/* Narrative Dialogue */}
-        {mode === 'narrating' && currentDialogue && (
-          <DialogueBox
-            speaker={speaker}
-            text={currentDialogue.text}
-            avatarStr={speaker.avatar}
-            isLast={dialogueIndex === currentAct.narrative.length - 1}
-            onComplete={handleDialogueComplete}
-          />
-        )}
-
-        {/* ── STORY BRIDGE: Priya/Pip connect story → Python ── */}
-        {mode === 'story-bridge' && currentAct.storyBridge?.length && (
-          <StoryBridgePhase
-            storyBridge={currentAct.storyBridge}
-            saga={saga}
-            onComplete={handleStoryBridgeDone}
-          />
-        )}
       </div>
 
       <FieldJournal
@@ -895,6 +1107,7 @@ function App() {
         currentActNumber={currentAct.act}
         completedActs={completedActs}
         xp={xp}
+        notes={notes}
       />
     </div>
   );

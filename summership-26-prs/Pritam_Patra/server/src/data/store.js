@@ -86,4 +86,24 @@ async function saveSession(sagaId, sessionData) {
   return session;
 }
 
-module.exports = { listSagas, getSaga, getAllActs, getAct, saveSession };
+async function listNotes(sagaId = null) {
+  const db = await readDb();
+  if (!db.notes) return [];
+  return sagaId ? db.notes.filter((n) => n.sagaId === sagaId) : db.notes;
+}
+
+async function addNote(sagaId, noteData) {
+  const db = await readDb();
+  if (!db.notes) db.notes = [];
+  const note = {
+    _id: crypto.randomUUID(),
+    sagaId,
+    ...noteData,
+    createdAt: new Date().toISOString()
+  };
+  db.notes.push(note);
+  await writeDb(db);
+  return note;
+}
+
+module.exports = { listSagas, getSaga, getAllActs, getAct, saveSession, listNotes, addNote };
