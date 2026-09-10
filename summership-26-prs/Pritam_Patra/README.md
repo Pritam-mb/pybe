@@ -1,69 +1,92 @@
 # PyBe — Inheritance Discovery Engine
+
 ### Contribution by Pritam Patra
 
----
-
-## What This Adds to PyBe
-
-This module teaches **Object-Oriented Inheritance** through a 4-phase guided discovery journey — without telling the learner the concept until they have already described it themselves.
-
-It directly addresses the core PyBe philosophy:
-> *"You give a case so that you keep exploring it and eventually you understand."*
+> **Discover the concept before being told its name.**
 
 ---
 
-## The 4-Phase Learning Journey
+## 🌟 Overview
 
-| Phase | Name | What the learner does |
-|---|---|---|
-| 1 | **Observe** | Reads a wildlife story. Describes what all animals have in common. No labels. |
-| 2 | **Discover** | Observes the Eagle. Describes what makes it the same AND different from a general animal. |
-| 3 | **Connect** | The concept name "Inheritance" is revealed. Learner bridges it to a new real-world example. |
-| 4 | **Apply** | Fills in `class Eagle(____)` — syntax becomes a confirmation of what they already understood. |
+**PyBe — Inheritance Discovery Engine** is a story-driven learning experience designed to help learners discover **Object-Oriented Inheritance** through observation, exploration, and application.
 
----
+Instead of beginning with a textbook definition, the learner enters a wildlife case study and takes the role of an observer.
 
-## The Key Differentiator: Adaptive Correction Loop
+The learner investigates the characters and their characteristics, compares general and specialized entities, identifies patterns, and gradually connects those observations to the programming concept of **Inheritance**.
 
-When a learner gives an incomplete observation, instead of saying "Wrong", the system calls Gemini to:
-1. Identify the specific gap in understanding
-2. Generate a story-based follow-up question targeting that exact gap
+Only after the learner has explored the relationship is the formal programming concept introduced.
 
-The learner can only advance when the LLM confirms genuine understanding.
+The experience then moves from the story into Python, allowing the learner to apply the discovered concept through code.
+
+> **You are given a case so that you keep exploring it and eventually understand it.**
 
 ---
 
-## Tech Stack
+# 📸 Application Preview
 
-- **Frontend:** React + Vite (port 5174)
-- **Backend:** Express + Node.js (port 5001)
-- **Database:** `db.json` — no external database, no auth
-- **AI:** Google Gemini 1.5 Flash (free tier, key in `.env`) with a local rule-based fallback
+![PyBe Inheritance Discovery Engine](./pybe-preview.png)
 
----
+The application opens with the **Wildlife Observer's Field Journal**, an interactive case study focused on discovering inheritance.
 
-## How to Run
+The experience is organized into:
 
-```bash
-# 1. Copy your Gemini API key into the .env file
-cp server/.env.example server/.env
-# Edit server/.env and set GEMINI_API_KEY=your_key_here
-
-# 2. Install dependencies
-npm install --prefix server
-npm install --prefix client
-
-# 3. Start both servers
-npm run dev --prefix server   # http://localhost:5001
-npm run dev --prefix client   # http://localhost:5174
-```
+- **3 learning arcs**
+- **8 interactive acts**
+- Story-based activities
+- Observation and discovery
+- Transfer scenarios
+- Multiple-choice checks
+- Concept explanations
+- Story-to-code connections
+- Python coding activities
+- Progress tracking
+- Field-journal style notes
 
 ---
 
-## Documentation
+# 📖 The Story Behind the Learning
 
-| File | Contents |
-|---|---|
-| [context.md](./context.md) | Why this approach, what problem it solves |
-| [spec.md](./spec.md) | Full technical specification and data schema |
-| [change.md](./change.md) | Computational thinking log — every design decision explained |
+The central case study is:
+
+## 🦅 Wildlife Observer's Field Journal
+
+The learner explores a wildlife scenario rather than immediately being given a programming definition.
+
+The story provides a familiar context in which the learner can notice that different animals can share common characteristics while also having their own specialized characteristics and behaviors.
+
+This creates the foundation for understanding the relationship between a **general class** and a **specialized class**.
+
+---
+
+## 📖 Story Experience
+
+The inheritance journey is presented as a wildlife investigation rather than a traditional programming lesson.
+
+The learner begins by observing different animals and identifying patterns in their characteristics and behavior. These observations gradually lead to the idea of general and specialized entities, creating a natural bridge to Object-Oriented Inheritance.
+
+<img src="./client/public/without_dialog/act1.png" alt="Inheritance Story - Act 1" width="800">
+
+### From Story to Concept
+
+The learner is guided through questions such as:
+
+> **What do you observe?**
+
+> **What characteristics do these animals share?**
+
+> **What makes one animal different from another?**
+
+These observations become the foundation for understanding inheritance before the programming terminology is introduced.
+
+The story therefore acts as the first step in the learning process:
+
+```text
+Observe
+   ↓
+Compare
+   ↓
+Identify the Pattern
+   ↓
+Discover Inheritance
+   ↓
+Apply It in Python
