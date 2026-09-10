@@ -28,7 +28,7 @@ async function readSaga(sagaId) {
 async function listSagas() {
   const files = await fs.readdir(sagasDir);
   const sagas = [];
-  for (const file of files.filter((f) => f.endsWith('.json'))) {
+  for (const file of files.filter((f) => f.endsWith('.json') && f !== 'polymorphism.json')) {
     const saga = await readSaga(path.basename(file, '.json'));
     if (saga) {
       sagas.push({

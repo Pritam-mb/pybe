@@ -40,38 +40,78 @@ body {
 .app {
   display:grid;
   grid-template-columns:1fr 280px;
-  grid-template-rows:56px 1fr;
+  grid-template-rows:1fr;
   height:100vh;
   overflow:hidden;
+  transition: grid-template-columns 0.3s ease;
 }
+
+.app.journal-closed {
+  grid-template-columns: 1fr 0px;
+}
+
+.app.journal-closed .field-journal {
+  opacity: 0;
+  pointer-events: none;
+}
+
 
 /* ── TOP BAR ────────────────────────────────────────────── */
 .topbar {
-  grid-column:1/3;
+  grid-column:1/2;
+  grid-row:1/2;
+  align-self:start;
   display:flex;
   align-items:center;
   gap:1rem;
-  padding:0 1.5rem;
-  background:rgba(17, 17, 27, 0.85);
-  border-bottom:1px solid var(--border);
-  backdrop-filter:blur(12px);
-  z-index:10;
+  padding:1rem 1.5rem;
+  background:transparent;
+  border-bottom:none;
+  z-index:20;
 }
 .topbar-brand { display:flex; align-items:center; gap:0.6rem; }
-.topbar-brand span { font-family:'Cinzel',serif; font-size:0.95rem; letter-spacing:0.05em; color:var(--text); }
-.topbar-brand small { font-size:0.72rem; color:var(--text-muted); font-family:'Inter',sans-serif; }
+.topbar-brand span { font-family:'Cinzel',serif; font-size:1.1rem; letter-spacing:0.05em; color:#fff; text-shadow:0 2px 5px rgba(0,0,0,0.8); }
+.topbar-brand small { font-size:0.75rem; color:#f1f1f1; font-family:'Inter',sans-serif; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
 .topbar-arc {
   margin-left:auto;
-  font-size:0.78rem;
-  color:var(--text-muted);
+  font-size:0.8rem;
+  font-weight: 500;
+  color:#fff;
   display:flex;
   align-items:center;
   gap:0.5rem;
+  text-shadow:0 1px 4px rgba(0,0,0,0.8);
 }
-.arc-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); }
+.arc-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 5px rgba(0,0,0,0.8); }
+
+.journal-toggle {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 1rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.journal-toggle:hover {
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  border-color: rgba(255,255,255,0.6);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
 
 /* ── MAIN STORY AREA ─────────────────────────────────────── */
 .story-area {
+  grid-column:1/2;
+  grid-row:1/2;
   display:flex;
   flex-direction:column;
   overflow:hidden;
@@ -549,6 +589,8 @@ body {
 
 /* ── FIELD JOURNAL ────────────────────────────────────────── */
 .field-journal {
+  grid-column: 2/3;
+  grid-row: 1/2;
   background:var(--bg-panel);
   border-left:1px solid var(--border);
   display:flex; flex-direction:column;

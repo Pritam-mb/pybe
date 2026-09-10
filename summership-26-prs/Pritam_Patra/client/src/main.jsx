@@ -88,7 +88,14 @@ function CinematicDialogue({ lines, characters, image, onComplete }) {
   const speaker = characters[current.speaker];
   const isLast  = idx === lines.length - 1;
   const isNarrator = current.speaker === 'narrator';
-  const layout = CHAR_LAYOUT[current.speaker];
+  let layout = CHAR_LAYOUT[current.speaker];
+
+  // Act-specific layout overrides to position bubbles precisely
+  if (layout && image) {
+    if (image.includes('act2.png') && current.speaker === 'priya') {
+      layout = { ...layout, pos: { top: '48%', left: '32%' } };
+    }
+  }
 
   function advance(e) {
     e.stopPropagation();
@@ -793,6 +800,7 @@ function App() {
   const [actIndex, setActIndex] = useState(0);
   const [mode, setMode] = useState('intro');
   const [bridgeIdx, setBridgeIdx] = useState(0);
+  const [isJournalOpen, setIsJournalOpen] = useState(true);
 
 
   const [completedActs, setCompletedActs] = useState([]);
@@ -844,11 +852,14 @@ function App() {
   // Saga Complete screen
   if (!currentAct) {
     return (
-      <div className="app">
+      <div className={`app ${!isJournalOpen ? 'journal-closed' : ''}`}>
         <div className="topbar">
           <div className="topbar-brand">
             <span>PyBe</span> <small>{saga.title}</small>
           </div>
+          <button className="journal-toggle" onClick={() => setIsJournalOpen(!isJournalOpen)}>
+            {isJournalOpen ? 'Hide Journal 📖' : 'Show Journal 📖'}
+          </button>
         </div>
         <div className="story-area">
           <div className="scene">
@@ -958,11 +969,7 @@ function App() {
   };
 
   const handleCodeSolve = () => {
-    if (currentAct.codeTask) {
-      setMode('code-write');
-    } else {
-      handleSuccessState();
-    }
+    handleSuccessState();
   };
 
   const handleCodeWriteDone = () => handleSuccessState();
@@ -980,7 +987,7 @@ function App() {
   };
 
   return (
-    <div className="app">
+    <div className={`app ${!isJournalOpen ? 'journal-closed' : ''}`}>
       {mode === 'intro' && (
         <ChapterCard
           arcLabel={`Arc ${arcInfo.arc} · ${arcInfo.name}`}
@@ -999,6 +1006,9 @@ function App() {
           <div className="arc-dot" style={{ background: arcInfo.color }} />
           Arc {arcInfo.arc}: {arcInfo.name}
         </div>
+        <button className="journal-toggle" onClick={() => setIsJournalOpen(!isJournalOpen)}>
+          {isJournalOpen ? 'Hide Journal 📖' : 'Show Journal 📖'}
+        </button>
       </div>
 
       <div className="story-area">
